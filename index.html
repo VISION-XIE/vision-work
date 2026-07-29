@@ -23,6 +23,7 @@
     --success-light: #e7f5ec;
     --neutral: #868e96;
     --neutral-light: #f1f3f5;
+    --chart-track: #e9eef4;
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -35,17 +36,8 @@
   }
   .app { max-width: 1100px; margin: 0 auto; }
   .app-header { margin-bottom: 24px; }
-  .app-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text);
-  }
-  .app-header .subtitle {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-top: 4px;
-  }
+  .app-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .app-header .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
 
   /* Dashboard */
   .dashboard {
@@ -63,228 +55,229 @@
   .balance-card { display: flex; flex-direction: column; gap: 6px; }
   .balance-label { color: var(--text-muted); font-size: 13px; }
   .balance-value {
-    font-size: 38px;
-    font-weight: 700;
-    color: var(--primary);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: 38px; font-weight: 700; color: var(--primary);
+    line-height: 1.1; letter-spacing: -0.02em;
   }
-  .balance-value span {
-    font-size: 16px;
-    color: var(--text-muted);
-    font-weight: 500;
-    margin-left: 6px;
-  }
+  .balance-value span { font-size: 16px; color: var(--text-muted); font-weight: 500; margin-left: 6px; }
   .balance-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-  .balance-meta strong { color: var(--warning); font-weight: 600; }
+  .balance-meta strong { color: var(--text-muted); font-weight: 600; }
+  .balance-meta .tag-ot { color: var(--primary); }
+  .balance-meta .tag-annual { color: var(--success); }
+  .balance-meta .tag-expiring { color: var(--warning); font-weight: 600; }
 
   .expiry-card .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em;
   }
   .expiry-list { display: flex; flex-direction: column; gap: 10px; }
   .expiry-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: var(--bg);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 8px; background: var(--bg);
     border-left: 3px solid var(--warning);
   }
   .expiry-item.urgent { border-left-color: var(--danger); }
   .expiry-item-info { display: flex; flex-direction: column; gap: 2px; }
   .expiry-date { font-weight: 600; font-size: 13px; }
   .expiry-detail { font-size: 12px; color: var(--text-muted); }
+  .expiry-type-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 8px;
+    font-size: 11px; font-weight: 500; margin-right: 6px;
+  }
+  .expiry-type-badge.overtime { background: var(--primary-light); color: var(--primary); }
+  .expiry-type-badge.annual { background: var(--success-light); color: var(--success); }
+  .expiry-type-badge.other { background: var(--neutral-light); color: var(--neutral); }
   .expiry-countdown { font-size: 12px; font-weight: 600; color: var(--warning); white-space: nowrap; }
   .expiry-countdown.urgent { color: var(--danger); }
   .empty-hint { color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px 0; }
 
   /* Tabs */
   .tabs {
-    display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 16px;
+    display: flex; gap: 4px; border-bottom: 1px solid var(--border);
+    margin-bottom: 16px; flex-wrap: wrap;
   }
   .tab {
-    background: none;
-    border: none;
-    padding: 10px 18px;
-    font-size: 14px;
-    color: var(--text-muted);
-    cursor: pointer;
+    background: none; border: none; padding: 10px 18px;
+    font-size: 14px; color: var(--text-muted); cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: color 0.15s, border-color 0.15s;
     font-family: inherit;
   }
   .tab:hover { color: var(--text); }
-  .tab.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-    font-weight: 600;
-  }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   .tab-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 14px;
   }
   .tab-header h2 { font-size: 18px; font-weight: 600; }
 
   /* Buttons */
   .btn {
-    padding: 8px 16px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    color: var(--text);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    padding: 8px 16px; border: 1px solid var(--border);
+    background: var(--card-bg); color: var(--text);
+    border-radius: 8px; cursor: pointer; font-size: 13px;
+    font-weight: 500; transition: background 0.15s, border-color 0.15s, color 0.15s;
     font-family: inherit;
   }
   .btn:hover { background: var(--bg); }
-  .btn.primary {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-  }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
   .btn.primary:hover { background: var(--primary-hover); }
   .btn.danger { color: var(--danger); border-color: var(--border); }
   .btn.danger:hover { background: var(--danger-light); border-color: var(--danger); }
-  .btn.ghost {
-    background: transparent;
-    border-color: transparent;
-    padding: 4px 10px;
-    color: var(--text-muted);
-  }
+  .btn.ghost { background: transparent; border-color: transparent; padding: 4px 10px; color: var(--text-muted); }
   .btn.ghost:hover { background: var(--bg); color: var(--text); }
   .btn.ghost.danger:hover { color: var(--danger); background: var(--danger-light); }
 
   /* Table */
   .table-wrap {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
   }
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 12px 16px; font-size: 13px; vertical-align: middle; }
   th {
-    background: var(--bg);
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    background: var(--bg); color: var(--text-muted);
+    font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.05em;
   }
   tbody tr + tr { border-top: 1px solid var(--border); }
   tbody tr:hover { background: var(--primary-light); }
-  .col-time, .col-duration, .col-expires, .col-status, .col-actions { white-space: nowrap; }
+  .col-time, .col-duration, .col-expires, .col-status, .col-type, .col-actions { white-space: nowrap; }
   .col-actions { text-align: right; }
+  .type-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 500;
+  }
+  .type-badge.overtime { background: var(--primary-light); color: var(--primary); }
+  .type-badge.annual { background: var(--success-light); color: var(--success); }
+  .type-badge.other { background: var(--neutral-light); color: var(--neutral); }
 
   /* Status badges */
-  .badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-  }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
   .badge.available { background: var(--success-light); color: var(--success); }
   .badge.expiring { background: var(--warning-light); color: var(--warning); }
   .badge.expired { background: var(--danger-light); color: var(--danger); }
   .badge.exhausted { background: var(--neutral-light); color: var(--neutral); }
   .badge.invalid { background: var(--neutral-light); color: var(--neutral); }
 
-  /* Modal */
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
+  /* Donut chart */
+  .pool-overview {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .donut-wrap {
+    position: relative;
+    width: 220px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+  }
+  .donut-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .donut-center {
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+  }
+  .donut-center .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .donut-center .num span {
+    font-size: 13px; color: var(--text-muted); font-weight: 500; margin-left: 2px;
+  }
+  .donut-center .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+  }
+  .legend-dot.overtime { background: var(--primary); }
+  .legend-dot.annual { background: var(--success); }
+  .legend-dot.other { background: var(--neutral); }
+  .legend-dot.empty { background: var(--chart-track); }
+  .legend-label { color: var(--text-muted); flex: 1; }
+  .legend-value { font-weight: 600; color: var(--text); }
+  .legend-percent { color: var(--text-muted); font-size: 12px; margin-left: 6px; }
+  .pool-empty-hint {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted);
     padding: 16px;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px;
   }
   .modal.hidden { display: none; }
   .modal-content {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 24px 28px;
-    width: 100%;
-    max-width: 460px;
+    background: var(--card-bg); border-radius: 12px; padding: 24px 28px;
+    width: 100%; max-width: 460px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: 90vh; overflow-y: auto;
   }
   .modal h3 { font-size: 18px; margin-bottom: 18px; font-weight: 600; }
   .form-group { margin-bottom: 16px; }
   .form-group label {
-    display: block;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    font-weight: 500;
+    display: block; font-size: 13px; color: var(--text-muted);
+    margin-bottom: 6px; font-weight: 500;
   }
-  .form-group input, .form-group textarea {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    background: white;
-    color: var(--text);
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 8px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit;
+    background: white; color: var(--text);
   }
-  .form-group input:focus, .form-group textarea:focus {
-    outline: none;
-    border-color: var(--primary);
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none; border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-light);
   }
   .form-group textarea { resize: vertical; min-height: 64px; }
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .form-preview {
-    padding: 10px 14px;
-    background: var(--bg);
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    line-height: 1.6;
+    padding: 10px 14px; background: var(--bg); border-radius: 8px;
+    font-size: 13px; color: var(--text-muted);
+    margin-bottom: 16px; line-height: 1.6;
   }
   .form-preview strong { color: var(--text); font-weight: 600; }
   .form-preview.warning { background: var(--warning-light); color: var(--warning); }
   .form-preview.error { background: var(--danger-light); color: var(--danger); }
   .form-error {
-    color: var(--danger);
-    font-size: 13px;
-    margin-bottom: 14px;
-    padding: 8px 12px;
-    background: var(--danger-light);
-    border-radius: 8px;
-    line-height: 1.5;
+    color: var(--danger); font-size: 13px; margin-bottom: 14px;
+    padding: 8px 12px; background: var(--danger-light);
+    border-radius: 8px; line-height: 1.5;
   }
   .form-error.hidden { display: none; }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 8px;
-  }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 
   /* Consumed breakdown */
   .consumed-detail { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
@@ -292,80 +285,43 @@
   .consumed-detail .line.orphan { color: var(--danger); }
 
   /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 56px 16px;
-    color: var(--text-muted);
-  }
+  .empty-state { text-align: center; padding: 56px 16px; color: var(--text-muted); }
   .empty-state .icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
 
   .confirm-message {
-    color: var(--text-muted);
-    font-size: 14px;
-    line-height: 1.7;
-    margin-bottom: 18px;
-    white-space: pre-wrap;
+    color: var(--text-muted); font-size: 14px; line-height: 1.7;
+    margin-bottom: 18px; white-space: pre-wrap;
   }
 
   /* Auth overlay */
   .auth-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    padding: 16px;
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; padding: 16px;
   }
   .auth-overlay.hidden { display: none; }
   .auth-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 36px 40px;
-    width: 100%;
-    max-width: 360px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-    text-align: center;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px 40px;
+    width: 100%; max-width: 360px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08); text-align: center;
   }
-  .auth-card h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 4px;
-    letter-spacing: -0.02em;
-  }
-  .auth-subtitle {
-    color: var(--text-muted);
-    font-size: 13px;
-    margin-bottom: 20px;
-  }
-  .auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  .auth-card h2 { font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 4px; letter-spacing: -0.02em; }
+  .auth-subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+  .auth-form { display: flex; flex-direction: column; gap: 10px; }
   .auth-form input {
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    background: white;
-    color: var(--text);
-    text-align: center;
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: white;
+    color: var(--text); text-align: center;
   }
-  .auth-form input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-light);
-  }
+  .auth-form input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
   .auth-form .btn { width: 100%; padding: 10px; }
 
   @media (max-width: 720px) {
     .dashboard { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
+    .pool-overview { grid-template-columns: 1fr; }
+    .donut-wrap { margin: 0 auto; }
     table { font-size: 12px; }
     th, td { padding: 10px 12px; }
     .app-header h1 { font-size: 24px; }
@@ -393,9 +349,9 @@
 
   <section class="dashboard">
     <div class="card balance-card">
-      <div class="balance-label">当前可用调休</div>
+      <div class="balance-label">当前可用假期</div>
       <div class="balance-value" id="balance-value">0.0 <span>小时</span></div>
-      <div class="balance-meta" id="balance-meta">暂无加班记录</div>
+      <div class="balance-meta" id="balance-meta">暂无假期记录</div>
     </div>
     <div class="card expiry-card">
       <div class="card-title">即将过期（14 天内）</div>
@@ -405,6 +361,7 @@
 
   <nav class="tabs">
     <button class="tab active" data-tab="overtime">加班记录</button>
+    <button class="tab" data-tab="leave-quota">年假额度</button>
     <button class="tab" data-tab="compensatory">调休记录</button>
     <button class="tab" data-tab="pool">额度池</button>
   </nav>
@@ -417,6 +374,14 @@
     <div class="table-wrap" id="overtime-table-wrap"></div>
   </section>
 
+  <section class="tab-content" id="tab-leave-quota">
+    <div class="tab-header">
+      <h2>年假额度</h2>
+      <button class="btn primary" id="btn-add-leave-quota">+ 新增年假</button>
+    </div>
+    <div class="table-wrap" id="leave-quota-table-wrap"></div>
+  </section>
+
   <section class="tab-content" id="tab-compensatory">
     <div class="tab-header">
       <h2>调休记录</h2>
@@ -427,8 +392,9 @@
 
   <section class="tab-content" id="tab-pool">
     <div class="tab-header">
-      <h2>调休额度池</h2>
+      <h2>额度池</h2>
     </div>
+    <div id="pool-overview-wrap"></div>
     <div class="table-wrap" id="pool-table-wrap"></div>
   </section>
 </div>
@@ -466,6 +432,46 @@
   </div>
 </div>
 
+<div class="modal hidden" id="leave-quota-modal">
+  <div class="modal-content">
+    <h3 id="leave-quota-modal-title">新增年假</h3>
+    <div class="form-error hidden" id="leave-quota-form-error"></div>
+    <form id="leave-quota-form" onsubmit="return false">
+      <input type="hidden" id="leave-quota-id">
+      <div class="form-group">
+        <label>类型</label>
+        <select id="leave-quota-type">
+          <option value="annual">年假</option>
+          <option value="other">其他假期</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>授予日</label>
+          <input type="date" id="leave-quota-date">
+        </div>
+        <div class="form-group">
+          <label>小时数</label>
+          <input type="number" id="leave-quota-hours" step="0.5" min="0.5" placeholder="如 8">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>过期日</label>
+        <input type="date" id="leave-quota-expires-at">
+      </div>
+      <div class="form-group">
+        <label>备注（可选）</label>
+        <textarea id="leave-quota-note" placeholder="如：2026 年度年假"></textarea>
+      </div>
+      <div class="form-preview" id="leave-quota-preview">年假额度：—</div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="leave-quota-cancel">取消</button>
+        <button type="button" class="btn primary" id="leave-quota-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal hidden" id="compensatory-modal">
   <div class="modal-content">
     <h3 id="compensatory-modal-title">新增调休</h3>
@@ -479,6 +485,12 @@
       <div class="form-group">
         <label>调休小时数</label>
         <input type="number" id="compensatory-hours" step="0.5" min="0.5" placeholder="如 1.5">
+      </div>
+      <div class="form-group">
+        <label>扣减来源</label>
+        <select id="compensatory-source">
+          <option value="fifo">自动 FIFO（按过期日跨类型扣减，推荐）</option>
+        </select>
       </div>
       <div class="form-group">
         <label>备注（可选）</label>
@@ -509,72 +521,52 @@
   'use strict';
 
   // ---------- 工具 ----------
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
   function pad2(n) { return n < 10 ? '0' + n : '' + n; }
   function todayStr() { return formatDate(new Date()); }
-  function nowTimeStr() {
-    const d = new Date();
-    return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
-  }
+  function nowTimeStr() { const d = new Date(); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
   function parseDateStr(s) {
+    if (s instanceof Date) return new Date(s);
     const [y, m, d] = s.split('-').map(Number);
     return new Date(y, m - 1, d);
   }
-  function formatDate(d) {
-    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  function formatDate(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function endOfYearStr(d) {
+    const ref = d ? new Date(d) : new Date();
+    return ref.getFullYear() + '-12-31';
   }
-  function addMonths(d, n) {
-    const r = new Date(d);
-    r.setMonth(r.getMonth() + n);
-    return r;
-  }
-  function startOfDay(d) {
-    const r = new Date(d);
-    r.setHours(0, 0, 0, 0);
-    return r;
-  }
+  function addMonths(d, n) { const r = new Date(d); r.setMonth(r.getMonth() + n); return r; }
+  function startOfDay(d) { const r = new Date(d); r.setHours(0, 0, 0, 0); return r; }
   function daysBetween(a, b) {
     const aT = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
     const bT = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
     return Math.floor((bT - aT) / 86400000);
   }
-  function parseTimeToMin(t) {
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m;
-  }
-  function formatHours(minutes) {
-    return (minutes / 60).toFixed(1);
-  }
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  function weekdayCN(dateStr) {
-    return ['日','一','二','三','四','五','六'][parseDateStr(dateStr).getDay()];
-  }
+  function parseTimeToMin(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+  function formatHours(minutes) { return (minutes / 60).toFixed(1); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function weekdayCN(dateStr) { return ['日','一','二','三','四','五','六'][parseDateStr(dateStr).getDay()]; }
+  function typeLabel(t) { return ({ overtime: '加班调休', annual: '年假', other: '其他' })[t] || t; }
 
-  const OT_START_MIN = 18 * 60 + 30; // 18:30
-  const MIN_VALID_MINUTES = 30;     // 30 分钟起算
+  const OT_START_MIN = 18 * 60 + 30;
+  const MIN_VALID_MINUTES = 30;
 
   function computeOvertimeRawMinutes(start, end) {
     const s = parseTimeToMin(start);
     const e = parseTimeToMin(end);
-    if (e < s) return 0; // 跨日不处理
+    if (e < s) return 0;
     const effectiveStart = Math.max(s, OT_START_MIN);
     return Math.max(0, e - effectiveStart);
   }
   function computeOvertimeMinutes(start, end) {
-    // 按 30 分钟向下取整（如 18:30-21:29 算到 21:00，即 2.5h）
     return Math.floor(computeOvertimeRawMinutes(start, end) / 30) * 30;
   }
-  function getExpireDate(otDate) {
-    return addMonths(parseDateStr(otDate), 2);
-  }
+  function getExpireDate(otDate) { return addMonths(parseDateStr(otDate), 2); }
 
   // ---------- 数据层 ----------
   const LS_KEY_OT = 'vision-work:overtime';
   const LS_KEY_CP = 'vision-work:compensatory';
+  const LS_KEY_LQ = 'vision-work:leave-quota';
 
   function loadOvertime() {
     try { return JSON.parse(localStorage.getItem(LS_KEY_OT) || '[]'); }
@@ -586,8 +578,13 @@
     catch(e) { return []; }
   }
   function saveCompensatory(list) { localStorage.setItem(LS_KEY_CP, JSON.stringify(list)); }
+  function loadLeaveQuota() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY_LQ) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveLeaveQuota(list) { localStorage.setItem(LS_KEY_LQ, JSON.stringify(list)); }
 
-  // 数据迁移：按 30 分钟向下取整规则重算历史加班记录
+  // ---------- 数据迁移 ----------
   function migrateOvertime() {
     const list = loadOvertime();
     let dirty = false;
@@ -600,75 +597,131 @@
     }
     if (dirty) saveOvertime(list);
   }
+  function migrateConsumedSourceType() {
+    const list = loadCompensatory();
+    let dirty = false;
+    for (const cp of list) {
+      if (!cp.consumed) continue;
+      for (const c of cp.consumed) {
+        if (!c.sourceType) { c.sourceType = 'overtime'; dirty = true; }
+        if (!c.sourceId && c.overtimeId) { c.sourceId = c.overtimeId; delete c.overtimeId; dirty = true; }
+      }
+    }
+    if (dirty) saveCompensatory(list);
+  }
+  function migrateData() {
+    migrateOvertime();
+    migrateConsumedSourceType();
+  }
 
-  // ---------- 池计算 ----------
-  function getConsumedByOvertimeId(otId, excludeCpId) {
+  // ---------- 池子计算 ----------
+  function getConsumedBySource(sourceType, sourceId, excludeCpId) {
     const list = loadCompensatory();
     let total = 0;
     for (const cp of list) {
       if (excludeCpId && cp.id === excludeCpId) continue;
       if (!cp.consumed) continue;
       for (const c of cp.consumed) {
-        if (c.overtimeId === otId) total += c.minutes;
+        const st = c.sourceType || 'overtime';
+        const sid = c.sourceId || c.overtimeId;
+        if (st === sourceType && sid === sourceId) total += c.minutes;
       }
     }
     return total;
   }
 
-  function getPool(ot, excludeCpId) {
-    const consumed = getConsumedByOvertimeId(ot.id, excludeCpId);
-    const total = ot.minutes;
-    const available = Math.max(0, total - consumed);
+  function computePoolStatus(totalMinutes, availableMinutes, daysLeft) {
+    if (totalMinutes === 0) return 'invalid';
+    if (availableMinutes === 0) return daysLeft < 0 ? 'expired' : 'exhausted';
+    if (daysLeft < 0) return 'expired';
+    if (daysLeft <= 14) return 'expiring';
+    return 'available';
+  }
+
+  function getOvertimePool(ot, excludeCpId) {
+    const consumedMinutes = getConsumedBySource('overtime', ot.id, excludeCpId);
+    const totalMinutes = ot.minutes;
+    const availableMinutes = Math.max(0, totalMinutes - consumedMinutes);
     const expiresAt = getExpireDate(ot.date);
     const today = startOfDay(new Date());
     const daysLeft = daysBetween(today, new Date(expiresAt));
-    let status;
-    if (total === 0) {
-      status = 'invalid';
-    } else if (available === 0) {
-      status = daysLeft < 0 ? 'expired' : 'exhausted';
-    } else if (daysLeft < 0) {
-      status = 'expired';
-    } else if (daysLeft <= 14) {
-      status = 'expiring';
-    } else {
-      status = 'available';
-    }
-    return { id: ot.id, date: ot.date, expiresAt, total, consumed, available, status, daysLeft, source: ot };
+    return {
+      id: ot.id, type: 'overtime', date: ot.date, expiresAt,
+      totalMinutes, consumedMinutes, availableMinutes,
+      status: computePoolStatus(totalMinutes, availableMinutes, daysLeft),
+      daysLeft, source: ot
+    };
+  }
+
+  function getLeaveQuotaPool(lq, excludeCpId) {
+    const consumedMinutes = getConsumedBySource(lq.type, lq.id, excludeCpId);
+    const totalMinutes = Math.round((lq.hours || 0) * 60);
+    const availableMinutes = Math.max(0, totalMinutes - consumedMinutes);
+    const expiresAt = parseDateStr(lq.expiresAt);
+    const today = startOfDay(new Date());
+    const daysLeft = daysBetween(today, new Date(expiresAt));
+    return {
+      id: lq.id, type: lq.type, date: lq.date, expiresAt,
+      totalMinutes, consumedMinutes, availableMinutes,
+      status: computePoolStatus(totalMinutes, availableMinutes, daysLeft),
+      daysLeft, source: lq
+    };
   }
 
   function getAllPools(excludeCpId) {
-    return loadOvertime().map(ot => getPool(ot, excludeCpId));
+    const otPools = loadOvertime().map(ot => getOvertimePool(ot, excludeCpId));
+    const lqPools = loadLeaveQuota().map(lq => getLeaveQuotaPool(lq, excludeCpId));
+    return [...otPools, ...lqPools];
   }
 
   function getAvailableTotal(excludeCpId) {
     return getAllPools(excludeCpId)
-      .filter(p => p.available > 0 && p.status !== 'expired')
-      .reduce((s, p) => s + p.available, 0);
+      .filter(p => p.availableMinutes > 0 && p.status !== 'expired')
+      .reduce((s, p) => s + p.availableMinutes, 0);
+  }
+
+  function getAvailableByType(excludeCpId) {
+    const result = { overtime: 0, annual: 0, other: 0 };
+    for (const p of getAllPools(excludeCpId)) {
+      if (p.availableMinutes > 0 && p.status !== 'expired') {
+        result[p.type] = (result[p.type] || 0) + p.availableMinutes;
+      }
+    }
+    return result;
   }
 
   function consumeByFifo(minutes, excludeCpId) {
     const pools = getAllPools(excludeCpId)
-      .filter(p => p.available > 0 && p.status !== 'expired')
+      .filter(p => p.availableMinutes > 0 && p.status !== 'expired')
       .sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)));
-
-    const availableTotal = pools.reduce((s, p) => s + p.available, 0);
+    const availableTotal = pools.reduce((s, p) => s + p.availableMinutes, 0);
     if (availableTotal < minutes) {
-      throw new Error('可用调休不足，当前仅 ' + formatHours(availableTotal) + ' 小时');
+      throw new Error('可用假期不足，当前仅 ' + formatHours(availableTotal) + ' 小时');
     }
-
     const consumed = [];
     let need = minutes;
     for (const p of pools) {
       if (need <= 0) break;
-      const take = Math.min(p.available, need);
-      consumed.push({ overtimeId: p.id, minutes: take });
+      const take = Math.min(p.availableMinutes, need);
+      consumed.push({ sourceType: p.type, sourceId: p.id, minutes: take });
       need -= take;
     }
     return consumed;
   }
 
-  // ---------- CRUD ----------
+  function consumeFromPool(sourceType, sourceId, minutes, excludeCpId) {
+    const pool = getAllPools(excludeCpId).find(p => p.type === sourceType && p.id === sourceId);
+    if (!pool) throw new Error('未找到指定的扣减来源');
+    if (pool.status === 'expired' || pool.availableMinutes <= 0) {
+      throw new Error(typeLabel(sourceType) + ' 该笔已无可用额度');
+    }
+    if (pool.availableMinutes < minutes) {
+      throw new Error(typeLabel(sourceType) + ' 该笔仅剩 ' + formatHours(pool.availableMinutes) + ' 小时，不足以扣减 ' + formatHours(minutes) + ' 小时');
+    }
+    return [{ sourceType, sourceId, minutes }];
+  }
+
+  // ---------- 加班 CRUD ----------
   function createOvertime({ date, start, end, note }) {
     const minutes = computeOvertimeMinutes(start, end);
     const ot = { id: uid(), date, start, end, minutes, note, createdAt: new Date().toISOString() };
@@ -677,7 +730,6 @@
     saveOvertime(list);
     return ot;
   }
-
   function updateOvertime(id, patch) {
     const list = loadOvertime();
     const i = list.findIndex(x => x.id === id);
@@ -686,27 +738,64 @@
     if (patch.start || patch.end) {
       merged.minutes = computeOvertimeMinutes(merged.start, merged.end);
     }
-    const consumed = getConsumedByOvertimeId(id);
+    const consumed = getConsumedBySource('overtime', id);
     if (merged.minutes < consumed) {
       throw new Error('新的加班时长 ' + formatHours(merged.minutes) + 'h 不足以覆盖已消耗的 ' + formatHours(consumed) + 'h 调休，请先删除相关调休或调整时间');
     }
     list[i] = merged;
     saveOvertime(list);
   }
-
   function deleteOvertimeCascade(id) {
     const cps = loadCompensatory();
-    const remaining = cps.filter(cp => !(cp.consumed && cp.consumed.some(c => c.overtimeId === id)));
+    const remaining = cps.filter(cp => !(cp.consumed && cp.consumed.some(c => (c.sourceType || 'overtime') === 'overtime' && (c.sourceId || c.overtimeId) === id)));
     saveCompensatory(remaining);
     saveOvertime(loadOvertime().filter(x => x.id !== id));
   }
 
-  function createCompensatory({ date, hours, note }) {
+  // ---------- 年假 CRUD ----------
+  function createLeaveQuota({ type, date, hours, expiresAt, note }) {
+    const lq = { id: uid(), type: type || 'annual', date, hours, expiresAt, note, createdAt: new Date().toISOString() };
+    const list = loadLeaveQuota();
+    list.push(lq);
+    saveLeaveQuota(list);
+    return lq;
+  }
+  function updateLeaveQuota(id, patch) {
+    const list = loadLeaveQuota();
+    const i = list.findIndex(x => x.id === id);
+    if (i < 0) throw new Error('年假记录不存在');
+    const old = list[i];
+    const merged = { ...old, ...patch };
+    const newType = merged.type;
+    const consumed = getConsumedBySource(newType, id);
+    const newTotalMin = Math.round((merged.hours || 0) * 60);
+    if (newTotalMin < consumed) {
+      throw new Error('新的额度 ' + formatHours(newTotalMin) + 'h 不足以覆盖已消耗的 ' + formatHours(consumed) + 'h，请先删除相关调休或调整额度');
+    }
+    list[i] = merged;
+    saveLeaveQuota(list);
+  }
+  function deleteLeaveQuotaCascade(id) {
+    const target = loadLeaveQuota().find(x => x.id === id);
+    if (!target) return;
+    const cps = loadCompensatory();
+    const remaining = cps.filter(cp => !(cp.consumed && cp.consumed.some(c => (c.sourceType || 'overtime') === target.type && (c.sourceId || c.overtimeId) === id)));
+    saveCompensatory(remaining);
+    saveLeaveQuota(loadLeaveQuota().filter(x => x.id !== id));
+  }
+
+  // ---------- 调休 CRUD ----------
+  function createCompensatory({ date, hours, note, source }) {
     const minutes = Math.round(hours * 60);
-    const consumed = consumeByFifo(minutes);
+    let consumed;
+    if (source && source !== 'fifo') {
+      const [type, id] = source.split(':');
+      consumed = consumeFromPool(type, id, minutes);
+    } else {
+      consumed = consumeByFifo(minutes);
+    }
     const cp = {
-      id: uid(),
-      date, hours, minutes, note, consumed,
+      id: uid(), date, hours, minutes, note, consumed, source: source || 'fifo',
       createdAt: new Date().toISOString()
     };
     const list = loadCompensatory();
@@ -714,7 +803,6 @@
     saveCompensatory(list);
     return cp;
   }
-
   function updateCompensatory(id, patch) {
     const list = loadCompensatory();
     const i = list.findIndex(x => x.id === id);
@@ -722,30 +810,32 @@
     const old = list[i];
     const newHours = patch.hours != null ? patch.hours : old.hours;
     const newMinutes = Math.round(newHours * 60);
-    const newConsumed = consumeByFifo(newMinutes, id); // 排除自身后重新分配
-    list[i] = { ...old, ...patch, hours: newHours, minutes: newMinutes, consumed: newConsumed };
+    const newSource = patch.source != null ? patch.source : (old.source || 'fifo');
+    let newConsumed;
+    if (newSource && newSource !== 'fifo') {
+      const [type, sid] = newSource.split(':');
+      newConsumed = consumeFromPool(type, sid, newMinutes, id);
+    } else {
+      newConsumed = consumeByFifo(newMinutes, id);
+    }
+    list[i] = { ...old, ...patch, hours: newHours, minutes: newMinutes, consumed: newConsumed, source: newSource };
     saveCompensatory(list);
   }
-
   function deleteCompensatory(id) {
     saveCompensatory(loadCompensatory().filter(x => x.id !== id));
   }
 
   // ---------- 渲染 ----------
   function statusLabel(s) {
-    return ({
-      available: '可用',
-      expiring: '即将过期',
-      expired: '已过期',
-      exhausted: '已用完',
-      invalid: '无效'
-    })[s] || s;
+    return ({ available: '可用', expiring: '即将过期', expired: '已过期', exhausted: '已用完', invalid: '无效' })[s] || s;
   }
 
   function renderAll() {
     renderDashboard();
     renderOvertimeList();
+    renderLeaveQuotaList();
     renderCompensatoryList();
+    renderPoolOverview();
     renderPoolList();
   }
 
@@ -753,19 +843,29 @@
     const total = getAvailableTotal();
     document.getElementById('balance-value').innerHTML = formatHours(total) + ' <span>小时</span>';
 
+    const byType = getAvailableByType();
     const pools = getAllPools();
-    const validPools = pools.filter(p => p.available > 0 && p.status !== 'expired' && p.status !== 'invalid');
+    const validPools = pools.filter(p => p.availableMinutes > 0 && p.status !== 'expired' && p.status !== 'invalid');
     const expiringPools = validPools.filter(p => p.status === 'expiring');
+
+    const otH = formatHours(byType.overtime);
+    const anH = formatHours(byType.annual);
+    const otherH = formatHours(byType.other);
+
+    let parts = [];
+    if (byType.overtime > 0) parts.push('<span class="tag-ot">调休 ' + otH + 'h</span>');
+    if (byType.annual > 0) parts.push('<span class="tag-annual">年假 ' + anH + 'h</span>');
+    if (byType.other > 0) parts.push('<span class="tag-other">其他 ' + otherH + 'h</span>');
 
     document.getElementById('balance-meta').innerHTML =
       validPools.length === 0
-        ? '暂无可用调休'
-        : '共 <strong>' + validPools.length + '</strong> 笔未过期加班' +
-          (expiringPools.length > 0 ? ' · <strong>' + expiringPools.length + '</strong> 笔即将过期' : '');
+        ? '暂无可用假期'
+        : parts.join(' · ') + ' · 共 <strong>' + validPools.length + '</strong> 笔未过期' +
+          (expiringPools.length > 0 ? ' · <span class="tag-expiring">' + expiringPools.length + ' 笔即将过期</span>' : '');
 
     const wrap = document.getElementById('expiry-list');
     if (expiringPools.length === 0) {
-      wrap.innerHTML = '<div class="empty-hint">14 天内无调休过期</div>';
+      wrap.innerHTML = '<div class="empty-hint">14 天内无假期过期</div>';
     } else {
       expiringPools.sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)));
       wrap.innerHTML = expiringPools.map(p => {
@@ -773,8 +873,8 @@
         const urgent = days <= 7;
         return '<div class="expiry-item' + (urgent ? ' urgent' : '') + '">' +
           '<div class="expiry-item-info">' +
-            '<div class="expiry-date">' + formatDate(new Date(p.expiresAt)) + ' 过期</div>' +
-            '<div class="expiry-detail">加班日 ' + p.date + ' · 剩余 ' + formatHours(p.available) + 'h</div>' +
+            '<div class="expiry-date"><span class="expiry-type-badge ' + p.type + '">' + typeLabel(p.type) + '</span>' + formatDate(new Date(p.expiresAt)) + ' 过期</div>' +
+            '<div class="expiry-detail">' + (p.type === 'overtime' ? '加班日 ' : '授予日 ') + p.date + ' · 剩余 ' + formatHours(p.availableMinutes) + 'h</div>' +
           '</div>' +
           '<div class="expiry-countdown' + (urgent ? ' urgent' : '') + '">' + (days === 0 ? '今天' : days + ' 天后') + '</div>' +
         '</div>';
@@ -797,7 +897,7 @@
         '<td class="col-time">' + ot.start + ' – ' + ot.end + '</td>' +
         '<td class="col-duration">' + formatHours(ot.minutes) + 'h</td>' +
         '<td class="col-expires">' + formatDate(new Date(p.expiresAt)) + '</td>' +
-        '<td>' + formatHours(p.available) + 'h / ' + formatHours(p.total) + 'h</td>' +
+        '<td>' + formatHours(p.availableMinutes) + 'h / ' + formatHours(p.totalMinutes) + 'h</td>' +
         '<td class="col-status"><span class="badge ' + p.status + '">' + statusLabel(p.status) + '</span></td>' +
         '<td class="col-actions">' +
           '<button class="btn ghost" data-edit-ot="' + ot.id + '">编辑</button>' +
@@ -814,6 +914,39 @@
     '</table>';
   }
 
+  function renderLeaveQuotaList() {
+    const list = loadLeaveQuota().slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    const wrap = document.getElementById('leave-quota-table-wrap');
+    if (list.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><div class="icon">🏖️</div>暂无年假额度，点击右上角「新增年假」开始记录</div>';
+      return;
+    }
+    const poolMap = Object.fromEntries(getAllPools().map(p => [p.id, p]));
+    const rows = list.map(lq => {
+      const p = poolMap[lq.id];
+      return '<tr>' +
+        '<td class="col-type"><span class="type-badge ' + lq.type + '">' + typeLabel(lq.type) + '</span></td>' +
+        '<td>' + lq.date + ' 周' + weekdayCN(lq.date) + '</td>' +
+        '<td class="col-duration">' + formatHours(p.totalMinutes) + 'h</td>' +
+        '<td class="col-expires">' + formatDate(new Date(p.expiresAt)) + '</td>' +
+        '<td>' + formatHours(p.availableMinutes) + 'h / ' + formatHours(p.totalMinutes) + 'h</td>' +
+        '<td class="col-status"><span class="badge ' + p.status + '">' + statusLabel(p.status) + '</span></td>' +
+        '<td>' + escapeHtml(lq.note || '') + '</td>' +
+        '<td class="col-actions">' +
+          '<button class="btn ghost" data-edit-lq="' + lq.id + '">编辑</button>' +
+          '<button class="btn ghost danger" data-del-lq="' + lq.id + '">删除</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<table>' +
+      '<thead><tr>' +
+        '<th>类型</th><th>授予日</th><th>额度</th><th>过期日</th><th>剩余/产生</th><th>状态</th><th>备注</th><th class="col-actions">操作</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>';
+  }
+
   function renderCompensatoryList() {
     const list = loadCompensatory().slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
     const wrap = document.getElementById('compensatory-table-wrap');
@@ -821,13 +954,24 @@
       wrap.innerHTML = '<div class="empty-state"><div class="icon">🌴</div>暂无调休记录</div>';
       return;
     }
+    // 索引池子，方便查类型 + 日期
     const otMap = Object.fromEntries(loadOvertime().map(o => [o.id, o]));
+    const lqMap = Object.fromEntries(loadLeaveQuota().map(l => [l.id, l]));
+
     const rows = list.map(cp => {
       const consumedDetail = (cp.consumed || []).map(c => {
-        const ot = otMap[c.overtimeId];
-        const otDate = ot ? (ot.date + ' 周' + weekdayCN(ot.date)) : '(加班已删除)';
-        const cls = ot ? 'line' : 'line orphan';
-        return '<span class="' + cls + '">· ' + otDate + ' 扣减 ' + formatHours(c.minutes) + 'h</span>';
+        const st = c.sourceType || 'overtime';
+        const sid = c.sourceId || c.overtimeId;
+        let src;
+        if (st === 'overtime') {
+          const ot = otMap[sid];
+          src = ot ? ('加班 ' + ot.date + ' 周' + weekdayCN(ot.date)) : '(加班已删除)';
+        } else {
+          const lq = lqMap[sid];
+          src = lq ? (typeLabel(lq.type) + ' ' + lq.date + ' 周' + weekdayCN(lq.date)) : '(额度已删除)';
+        }
+        const cls = (st === 'overtime' ? otMap[sid] : lqMap[sid]) ? 'line' : 'line orphan';
+        return '<span class="' + cls + '">· ' + src + ' 扣减 ' + formatHours(c.minutes) + 'h</span>';
       }).join('') || '<span class="line">（无消耗明细）</span>';
 
       return '<tr>' +
@@ -844,10 +988,58 @@
 
     wrap.innerHTML = '<table>' +
       '<thead><tr>' +
-        '<th>日期</th><th>调休</th><th>FIFO 消耗详情</th><th>备注</th><th class="col-actions">操作</th>' +
+        '<th>日期</th><th>调休</th><th>扣减详情</th><th>备注</th><th class="col-actions">操作</th>' +
       '</tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table>';
+  }
+
+  function renderPoolOverview() {
+    const wrap = document.getElementById('pool-overview-wrap');
+    const byType = getAvailableByType();
+    const total = byType.overtime + byType.annual + byType.other;
+
+    if (total === 0) {
+      wrap.innerHTML = '<div class="pool-overview"><div class="pool-empty-hint">暂无可用假期额度</div></div>';
+      return;
+    }
+
+    const circumference = 2 * Math.PI * 70; // r=70, 周长 ≈ 439.82
+    const otPct = total > 0 ? byType.overtime / total : 0;
+    const annualPct = total > 0 ? byType.annual / total : 0;
+    const otherPct = total > 0 ? byType.other / total : 0;
+    const otLen = otPct * circumference;
+    const annualLen = annualPct * circumference;
+    const otherLen = otherPct * circumference;
+    // dashoffset：第一段从 0 开始，后续段累加
+    // SVG dasharray + dashoffset；offset 是负数往前往画
+    const otOffset = 0;
+    const annualOffset = -otLen;
+    const otherOffset = -(otLen + annualLen);
+
+    const legendParts = [];
+    if (byType.overtime > 0) {
+      legendParts.push('<div class="legend-item"><span class="legend-dot overtime"></span><span class="legend-label">加班调休</span><span class="legend-value">' + formatHours(byType.overtime) + 'h</span><span class="legend-percent">' + (otPct * 100).toFixed(1) + '%</span></div>');
+    }
+    if (byType.annual > 0) {
+      legendParts.push('<div class="legend-item"><span class="legend-dot annual"></span><span class="legend-label">年假</span><span class="legend-value">' + formatHours(byType.annual) + 'h</span><span class="legend-percent">' + (annualPct * 100).toFixed(1) + '%</span></div>');
+    }
+    if (byType.other > 0) {
+      legendParts.push('<div class="legend-item"><span class="legend-dot other"></span><span class="legend-label">其他</span><span class="legend-value">' + formatHours(byType.other) + 'h</span><span class="legend-percent">' + (otherPct * 100).toFixed(1) + '%</span></div>');
+    }
+
+    wrap.innerHTML = '<div class="pool-overview">' +
+      '<div class="donut-wrap">' +
+        '<svg viewBox="0 0 160 160">' +
+          '<circle cx="80" cy="80" r="70" fill="none" stroke="' + '#e9eef4' + '" stroke-width="20"/>' +
+          (byType.overtime > 0 ? '<circle cx="80" cy="80" r="70" fill="none" stroke="var(--primary)" stroke-width="20" stroke-dasharray="' + otLen + ' ' + (circumference - otLen) + '" stroke-dashoffset="' + otOffset + '"/>' : '') +
+          (byType.annual > 0 ? '<circle cx="80" cy="80" r="70" fill="none" stroke="var(--success)" stroke-width="20" stroke-dasharray="' + annualLen + ' ' + (circumference - annualLen) + '" stroke-dashoffset="' + annualOffset + '"/>' : '') +
+          (byType.other > 0 ? '<circle cx="80" cy="80" r="70" fill="none" stroke="var(--neutral)" stroke-width="20" stroke-dasharray="' + otherLen + ' ' + (circumference - otherLen) + '" stroke-dashoffset="' + otherOffset + '"/>' : '') +
+        '</svg>' +
+        '<div class="donut-center"><div class="num">' + formatHours(total) + '<span>h</span></div><div class="lbl">可用假期</div></div>' +
+      '</div>' +
+      '<div class="donut-legend">' + legendParts.join('') + '</div>' +
+    '</div>';
   }
 
   function renderPoolList() {
@@ -859,19 +1051,20 @@
     }
     const rows = pools.map(p => {
       return '<tr>' +
+        '<td class="col-type"><span class="type-badge ' + p.type + '">' + typeLabel(p.type) + '</span></td>' +
         '<td>' + p.date + ' 周' + weekdayCN(p.date) + '</td>' +
         '<td class="col-expires">' + formatDate(new Date(p.expiresAt)) + '</td>' +
         '<td>' + (p.daysLeft >= 0 ? p.daysLeft + ' 天' : '已过期 ' + (-p.daysLeft) + ' 天') + '</td>' +
-        '<td class="col-duration">' + formatHours(p.total) + 'h</td>' +
-        '<td>' + formatHours(p.consumed) + 'h</td>' +
-        '<td>' + formatHours(p.available) + 'h</td>' +
+        '<td class="col-duration">' + formatHours(p.totalMinutes) + 'h</td>' +
+        '<td>' + formatHours(p.consumedMinutes) + 'h</td>' +
+        '<td>' + formatHours(p.availableMinutes) + 'h</td>' +
         '<td class="col-status"><span class="badge ' + p.status + '">' + statusLabel(p.status) + '</span></td>' +
       '</tr>';
     }).join('');
 
     wrap.innerHTML = '<table>' +
       '<thead><tr>' +
-        '<th>加班日</th><th>过期日</th><th>剩余天数</th><th>产生</th><th>已消耗</th><th>剩余</th><th>状态</th>' +
+        '<th>类型</th><th>日期</th><th>过期日</th><th>剩余天数</th><th>产生</th><th>已消耗</th><th>剩余</th><th>状态</th>' +
       '</tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table>';
@@ -883,7 +1076,6 @@
     const errorEl = document.getElementById('overtime-form-error');
     errorEl.classList.add('hidden');
     errorEl.textContent = '';
-
     if (id) {
       const ot = loadOvertime().find(x => x.id === id);
       if (!ot) return;
@@ -906,42 +1098,25 @@
     document.getElementById('overtime-modal').classList.remove('hidden');
   }
   function closeOvertimeModal() { document.getElementById('overtime-modal').classList.add('hidden'); }
-
   function updateOvertimePreview() {
     const date = document.getElementById('overtime-date').value;
     const start = document.getElementById('overtime-start').value;
     const end = document.getElementById('overtime-end').value;
     const preview = document.getElementById('overtime-preview');
-
-    if (!date || !start || !end) {
-      preview.textContent = '加班时长：—';
-      preview.className = 'form-preview';
-      return;
-    }
+    if (!date || !start || !end) { preview.textContent = '加班时长：—'; preview.className = 'form-preview'; return; }
     const raw = computeOvertimeRawMinutes(start, end);
     const minutes = computeOvertimeMinutes(start, end);
     const expireDate = formatDate(getExpireDate(date));
     const wd = weekdayCN(date);
     const isWeekend = (wd === '六' || wd === '日');
-
     let prefix = '加班日期 周' + wd;
     if (isWeekend) prefix += '（周末，按规则只记录工作日加班）';
-
-    if (end < start) {
-      preview.textContent = prefix + ' · 结束时间不能早于开始时间';
-      preview.className = 'form-preview error';
-      return;
-    }
-    if (minutes < MIN_VALID_MINUTES) {
-      preview.textContent = prefix + ' · 实际加班 ' + raw + ' 分钟，不足 30 分钟不计入调休';
-      preview.className = 'form-preview error';
-      return;
-    }
+    if (end < start) { preview.textContent = prefix + ' · 结束时间不能早于开始时间'; preview.className = 'form-preview error'; return; }
+    if (minutes < MIN_VALID_MINUTES) { preview.textContent = prefix + ' · 实际加班 ' + raw + ' 分钟，不足 30 分钟不计入调休'; preview.className = 'form-preview error'; return; }
     const note = (raw === minutes) ? '' : '（按 30 分钟向下取整，实际 ' + raw + ' 分钟）';
     preview.innerHTML = prefix + ' · 加班时长 <strong>' + formatHours(minutes) + ' 小时</strong>' + note + ' · 调休过期日 <strong>' + expireDate + '</strong>';
     preview.className = isWeekend ? 'form-preview warning' : 'form-preview';
   }
-
   function submitOvertime() {
     const id = document.getElementById('overtime-id').value;
     const date = document.getElementById('overtime-date').value;
@@ -949,15 +1124,8 @@
     const end = document.getElementById('overtime-end').value;
     const note = document.getElementById('overtime-note').value.trim();
     const errorEl = document.getElementById('overtime-form-error');
-
-    if (!date || !start || !end) {
-      showFormError(errorEl, '请填写完整的日期和时间');
-      return;
-    }
-    if (end < start) {
-      showFormError(errorEl, '结束时间不能早于开始时间');
-      return;
-    }
+    if (!date || !start || !end) { showFormError(errorEl, '请填写完整的日期和时间'); return; }
+    if (end < start) { showFormError(errorEl, '结束时间不能早于开始时间'); return; }
     const minutes = computeOvertimeMinutes(start, end);
     if (minutes < MIN_VALID_MINUTES) {
       const raw = computeOvertimeRawMinutes(start, end);
@@ -969,39 +1137,138 @@
       else createOvertime({ date, start, end, note });
       closeOvertimeModal();
       renderAll();
-    } catch (e) {
-      showFormError(errorEl, e.message);
-    }
+    } catch (e) { showFormError(errorEl, e.message); }
   }
-
-  function showFormError(el, msg) {
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
+  function showFormError(el, msg) { el.textContent = msg; el.classList.remove('hidden'); }
 
   function confirmDeleteOvertime(id) {
     const ot = loadOvertime().find(x => x.id === id);
     if (!ot) return;
-    const affected = loadCompensatory().filter(cp => cp.consumed && cp.consumed.some(c => c.overtimeId === id));
+    const affected = loadCompensatory().filter(cp => cp.consumed && cp.consumed.some(c => (c.sourceType || 'overtime') === 'overtime' && (c.sourceId || c.overtimeId) === id));
     let msg = '确定删除加班记录 ' + ot.date + ' 周' + weekdayCN(ot.date) + '（' + formatHours(ot.minutes) + 'h）吗？';
     if (affected.length > 0) {
       msg += '\n\n此加班已被 ' + affected.length + ' 笔调休消耗：\n' +
         affected.map(c => '  · ' + c.date + ' ' + formatHours(c.minutes) + 'h').join('\n') +
         '\n\n删除此加班将同时删除这 ' + affected.length + ' 笔调休记录。';
     }
-    showConfirm('删除加班', msg, () => {
-      deleteOvertimeCascade(id);
+    showConfirm('删除加班', msg, () => { deleteOvertimeCascade(id); renderAll(); });
+  }
+
+  // ---------- Modal: 年假 ----------
+  function openLeaveQuotaModal(id) {
+    const title = document.getElementById('leave-quota-modal-title');
+    const errorEl = document.getElementById('leave-quota-form-error');
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+    if (id) {
+      const lq = loadLeaveQuota().find(x => x.id === id);
+      if (!lq) return;
+      title.textContent = '编辑年假';
+      document.getElementById('leave-quota-id').value = lq.id;
+      document.getElementById('leave-quota-type').value = lq.type || 'annual';
+      document.getElementById('leave-quota-date').value = lq.date;
+      document.getElementById('leave-quota-hours').value = lq.hours;
+      document.getElementById('leave-quota-expires-at').value = lq.expiresAt;
+      document.getElementById('leave-quota-note').value = lq.note || '';
+    } else {
+      title.textContent = '新增年假';
+      document.getElementById('leave-quota-id').value = '';
+      const today = todayStr();
+      document.getElementById('leave-quota-type').value = 'annual';
+      document.getElementById('leave-quota-date').value = today;
+      document.getElementById('leave-quota-hours').value = '';
+      document.getElementById('leave-quota-expires-at').value = endOfYearStr(parseDateStr(today));
+      document.getElementById('leave-quota-note').value = '';
+    }
+    updateLeaveQuotaPreview();
+    document.getElementById('leave-quota-modal').classList.remove('hidden');
+  }
+  function closeLeaveQuotaModal() { document.getElementById('leave-quota-modal').classList.add('hidden'); }
+  function updateLeaveQuotaPreview() {
+    const date = document.getElementById('leave-quota-date').value;
+    const hoursStr = document.getElementById('leave-quota-hours').value;
+    const expiresAt = document.getElementById('leave-quota-expires-at').value;
+    const type = document.getElementById('leave-quota-type').value;
+    const preview = document.getElementById('leave-quota-preview');
+    if (!date || !expiresAt) { preview.textContent = typeLabel(type) + '额度：—'; preview.className = 'form-preview'; return; }
+    const hours = parseFloat(hoursStr);
+    if (isNaN(hours) || hours <= 0) {
+      preview.innerHTML = typeLabel(type) + ' · 授予日 <strong>' + date + ' 周' + weekdayCN(date) + '</strong> · 过期日 <strong>' + expiresAt + '</strong>';
+      preview.className = 'form-preview';
+      return;
+    }
+    const daysLeft = daysBetween(startOfDay(new Date()), parseDateStr(expiresAt));
+    const expireNote = daysLeft < 0 ? '（已过期）' : '（剩 ' + daysLeft + ' 天）';
+    preview.innerHTML = typeLabel(type) + ' · 授予日 <strong>' + date + ' 周' + weekdayCN(date) + '</strong> · 额度 <strong>' + hours.toFixed(1) + ' 小时</strong> · 过期日 <strong>' + expiresAt + '</strong>' + expireNote;
+    preview.className = daysLeft < 0 ? 'form-preview error' : (daysLeft <= 14 ? 'form-preview warning' : 'form-preview');
+  }
+  function submitLeaveQuota() {
+    const id = document.getElementById('leave-quota-id').value;
+    const type = document.getElementById('leave-quota-type').value;
+    const date = document.getElementById('leave-quota-date').value;
+    const hours = parseFloat(document.getElementById('leave-quota-hours').value);
+    const expiresAt = document.getElementById('leave-quota-expires-at').value;
+    const note = document.getElementById('leave-quota-note').value.trim();
+    const errorEl = document.getElementById('leave-quota-form-error');
+    if (!date) { showFormError(errorEl, '请填写授予日'); return; }
+    if (!expiresAt) { showFormError(errorEl, '请填写过期日'); return; }
+    if (isNaN(hours) || hours <= 0) { showFormError(errorEl, '请填写有效的小时数'); return; }
+    if (parseDateStr(expiresAt) < parseDateStr(date)) { showFormError(errorEl, '过期日不能早于授予日'); return; }
+    try {
+      if (id) updateLeaveQuota(id, { type, date, hours, expiresAt, note });
+      else createLeaveQuota({ type, date, hours, expiresAt, note });
+      closeLeaveQuotaModal();
       renderAll();
-    });
+    } catch (e) { showFormError(errorEl, e.message); }
+  }
+  function confirmDeleteLeaveQuota(id) {
+    const lq = loadLeaveQuota().find(x => x.id === id);
+    if (!lq) return;
+    const affected = loadCompensatory().filter(cp => cp.consumed && cp.consumed.some(c => (c.sourceType || 'overtime') === lq.type && (c.sourceId || c.overtimeId) === id));
+    let msg = '确定删除 ' + typeLabel(lq.type) + '记录 ' + lq.date + ' 周' + weekdayCN(lq.date) + '（' + formatHours(lq.hours * 60) + 'h）吗？';
+    if (affected.length > 0) {
+      msg += '\n\n此额度已被 ' + affected.length + ' 笔调休消耗：\n' +
+        affected.map(c => '  · ' + c.date + ' ' + formatHours(c.minutes) + 'h').join('\n') +
+        '\n\n删除此额度将同时删除这 ' + affected.length + ' 笔调休记录。';
+    }
+    showConfirm('删除 ' + typeLabel(lq.type), msg, () => { deleteLeaveQuotaCascade(id); renderAll(); });
   }
 
   // ---------- Modal: 调休 ----------
+  function refreshCompensatorySourceOptions(excludeCpId, currentValue) {
+    const sel = document.getElementById('compensatory-source');
+    const cur = currentValue || sel.value || 'fifo';
+    sel.innerHTML = '<option value="fifo">自动 FIFO（按过期日跨类型扣减，推荐）</option>' +
+      '<optgroup label="加班调休">' +
+      getAllPools(excludeCpId)
+        .filter(p => p.type === 'overtime' && p.availableMinutes > 0 && p.status !== 'expired')
+        .sort((a, b) => (a.expiresAt - b.expiresAt))
+        .map(p => '<option value="overtime:' + p.id + '">加班 ' + p.date + ' · 剩 ' + formatHours(p.availableMinutes) + 'h · 过期 ' + formatDate(new Date(p.expiresAt)) + '</option>')
+        .join('') +
+      '</optgroup>' +
+      '<optgroup label="年假">' +
+      getAllPools(excludeCpId)
+        .filter(p => p.type === 'annual' && p.availableMinutes > 0 && p.status !== 'expired')
+        .sort((a, b) => (a.expiresAt - b.expiresAt))
+        .map(p => '<option value="annual:' + p.id + '">年假 ' + p.date + ' · 剩 ' + formatHours(p.availableMinutes) + 'h · 过期 ' + formatDate(new Date(p.expiresAt)) + '</option>')
+        .join('') +
+      '</optgroup>' +
+      '<optgroup label="其他">' +
+      getAllPools(excludeCpId)
+        .filter(p => p.type === 'other' && p.availableMinutes > 0 && p.status !== 'expired')
+        .sort((a, b) => (a.expiresAt - b.expiresAt))
+        .map(p => '<option value="other:' + p.id + '">其他 ' + p.date + ' · 剩 ' + formatHours(p.availableMinutes) + 'h · 过期 ' + formatDate(new Date(p.expiresAt)) + '</option>')
+        .join('') +
+      '</optgroup>';
+    // 尝试保留选择
+    if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+  }
+
   function openCompensatoryModal(id) {
     const title = document.getElementById('compensatory-modal-title');
     const errorEl = document.getElementById('compensatory-form-error');
     errorEl.classList.add('hidden');
     errorEl.textContent = '';
-
     if (id) {
       const cp = loadCompensatory().find(x => x.id === id);
       if (!cp) return;
@@ -1010,64 +1277,83 @@
       document.getElementById('compensatory-date').value = cp.date;
       document.getElementById('compensatory-hours').value = cp.hours;
       document.getElementById('compensatory-note').value = cp.note || '';
+      refreshCompensatorySourceOptions(id, cp.source || 'fifo');
     } else {
       title.textContent = '新增调休';
       document.getElementById('compensatory-id').value = '';
       document.getElementById('compensatory-date').value = todayStr();
       document.getElementById('compensatory-hours').value = '';
       document.getElementById('compensatory-note').value = '';
+      refreshCompensatorySourceOptions();
     }
     updateCompensatoryPreview();
     document.getElementById('compensatory-modal').classList.remove('hidden');
   }
   function closeCompensatoryModal() { document.getElementById('compensatory-modal').classList.add('hidden'); }
-
   function updateCompensatoryPreview() {
     const id = document.getElementById('compensatory-id').value;
     const hoursStr = document.getElementById('compensatory-hours').value;
+    const source = document.getElementById('compensatory-source').value;
     const hours = parseFloat(hoursStr);
     const preview = document.getElementById('compensatory-preview');
-    const available = getAvailableTotal(id) / 60;
+    const byType = getAvailableByType(id);
+    const totalAvail = byType.overtime + byType.annual + byType.other;
+    const otH = formatHours(byType.overtime);
+    const anH = formatHours(byType.annual);
+    let summary = '当前可用 <strong>' + formatHours(totalAvail) + 'h</strong>（调休 ' + otH + 'h';
+    if (byType.annual > 0) summary += ' · 年假 ' + anH + 'h';
+    if (byType.other > 0) summary += ' · 其他 ' + formatHours(byType.other) + 'h';
+    summary += '）';
 
-    if (isNaN(hours) || hours <= 0) {
-      preview.innerHTML = '当前可用：<strong>' + formatHours(available * 60) + ' 小时</strong>';
-      preview.className = 'form-preview';
-      return;
-    }
-    if (hours > available) {
-      preview.innerHTML = '申请 <strong>' + hours + 'h</strong> · 当前可用 <strong>' + formatHours(available * 60) + 'h</strong> · 余额不足';
-      preview.className = 'form-preview error';
+    if (source === 'fifo') {
+      if (isNaN(hours) || hours <= 0) { preview.innerHTML = summary; preview.className = 'form-preview'; return; }
+      if (hours > totalAvail / 60) {
+        preview.innerHTML = '申请 <strong>' + hours + 'h</strong> · ' + summary + ' · 余额不足';
+        preview.className = 'form-preview error';
+      } else {
+        preview.innerHTML = '申请 <strong>' + hours + 'h</strong>（自动 FIFO 跨类型扣减） · ' + summary + ' · 余额充足';
+        preview.className = 'form-preview';
+      }
     } else {
-      preview.innerHTML = '申请 <strong>' + hours + 'h</strong> · 当前可用 <strong>' + formatHours(available * 60) + 'h</strong> · 余额充足';
-      preview.className = 'form-preview';
+      const [type, sid] = source.split(':');
+      const pool = getAllPools(id).find(p => p.type === type && p.id === sid);
+      if (!pool) { preview.innerHTML = summary + '<br>该来源已不可用，请重新选择'; preview.className = 'form-preview error'; return; }
+      const poolH = pool.availableMinutes / 60;
+      if (isNaN(hours) || hours <= 0) {
+        preview.innerHTML = '从 ' + typeLabel(type) + ' ' + pool.date + ' 扣减（剩 ' + formatHours(pool.availableMinutes) + 'h） · ' + summary;
+        preview.className = 'form-preview';
+        return;
+      }
+      if (hours > poolH) {
+        preview.innerHTML = '从 ' + typeLabel(type) + ' ' + pool.date + ' 扣减 <strong>' + hours + 'h</strong> · 该笔仅剩 <strong>' + formatHours(pool.availableMinutes) + 'h</strong> · 不足';
+        preview.className = 'form-preview error';
+      } else {
+        preview.innerHTML = '从 ' + typeLabel(type) + ' ' + pool.date + ' 扣减 <strong>' + hours + 'h</strong> · 该笔剩 ' + formatHours(pool.availableMinutes) + 'h · 充足';
+        preview.className = 'form-preview';
+      }
     }
   }
-
   function submitCompensatory() {
     const id = document.getElementById('compensatory-id').value;
     const date = document.getElementById('compensatory-date').value;
     const hours = parseFloat(document.getElementById('compensatory-hours').value);
+    const source = document.getElementById('compensatory-source').value;
     const note = document.getElementById('compensatory-note').value.trim();
     const errorEl = document.getElementById('compensatory-form-error');
-
     if (!date) { showFormError(errorEl, '请填写调休日期'); return; }
     if (isNaN(hours) || hours <= 0) { showFormError(errorEl, '请填写有效的小时数'); return; }
-
     try {
-      if (id) updateCompensatory(id, { date, hours, note });
-      else createCompensatory({ date, hours, note });
+      if (id) updateCompensatory(id, { date, hours, note, source });
+      else createCompensatory({ date, hours, note, source });
       closeCompensatoryModal();
       renderAll();
-    } catch (e) {
-      showFormError(errorEl, e.message);
-    }
+    } catch (e) { showFormError(errorEl, e.message); }
   }
-
   function confirmDeleteCompensatory(id) {
     const cp = loadCompensatory().find(x => x.id === id);
     if (!cp) return;
     showConfirm('删除调休',
-      '确定删除调休记录 ' + cp.date + ' 周' + weekdayCN(cp.date) + '（' + formatHours(cp.minutes) + 'h）吗？\n\n删除后，此调休已扣减的额度会归还到对应加班池。',
+      '确定删除调休记录 ' + cp.date + ' 周' + weekdayCN(cp.date) + '（' + formatHours(cp.minutes) + 'h）吗？\n\n删除后，此调休已扣减的额度会归还到对应池。',
       () => { deleteCompensatory(id); renderAll(); });
   }
 
@@ -1090,60 +1376,9 @@
     document.querySelectorAll('.tab-content').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
   }
 
-  // ---------- 事件绑定 ----------
-  function bindEvents() {
-    document.querySelectorAll('.tab').forEach(b => {
-      b.addEventListener('click', () => switchTab(b.dataset.tab));
-    });
-
-    document.getElementById('btn-add-overtime').addEventListener('click', () => openOvertimeModal());
-    document.getElementById('btn-add-compensatory').addEventListener('click', () => openCompensatoryModal());
-
-    document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
-    document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
-    ['overtime-date', 'overtime-start', 'overtime-end'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updateOvertimePreview);
-    });
-
-    document.getElementById('compensatory-cancel').addEventListener('click', closeCompensatoryModal);
-    document.getElementById('compensatory-submit').addEventListener('click', submitCompensatory);
-    document.getElementById('compensatory-hours').addEventListener('input', updateCompensatoryPreview);
-
-    document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
-    document.getElementById('confirm-ok').addEventListener('click', () => {
-      const cb = confirmCallback;
-      closeConfirm();
-      if (cb) cb();
-    });
-
-    // 列表内按钮（事件委托）
-    document.getElementById('overtime-table-wrap').addEventListener('click', e => {
-      const t = e.target;
-      if (t.dataset.editOt) openOvertimeModal(t.dataset.editOt);
-      else if (t.dataset.delOt) confirmDeleteOvertime(t.dataset.delOt);
-    });
-    document.getElementById('compensatory-table-wrap').addEventListener('click', e => {
-      const t = e.target;
-      if (t.dataset.editCp) openCompensatoryModal(t.dataset.editCp);
-      else if (t.dataset.delCp) confirmDeleteCompensatory(t.dataset.delCp);
-    });
-
-    // 点击 modal 背景关闭
-    document.querySelectorAll('.modal').forEach(m => {
-      m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); });
-    });
-    // ESC 关闭
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.modal:not(.hidden)').forEach(m => m.classList.add('hidden'));
-      }
-    });
-  }
-
   // ---------- 口令保护 ----------
   const PASSWORD_HASH = 'a2d194c09903827411a91bf62e2c3cc7a23e8f9665da868c155d57637621d558';
   const AUTH_KEY = 'vision-work:auth';
-
   async function sha256Hex(text) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -1174,26 +1409,64 @@
     const submit = document.getElementById('auth-submit');
     submit.addEventListener('click', async () => {
       const ok = await tryAuth(input.value);
-      if (ok) {
-        hideAuthOverlay();
-      } else {
-        showAuthError('口令错误，请重试');
-        input.value = '';
-        input.focus();
-      }
+      if (ok) hideAuthOverlay();
+      else { showAuthError('口令错误，请重试'); input.value = ''; input.focus(); }
     });
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') submit.click();
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') submit.click(); });
+  }
+
+  // ---------- 事件绑定 ----------
+  function bindEvents() {
+    document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+    document.getElementById('btn-add-overtime').addEventListener('click', () => openOvertimeModal());
+    document.getElementById('btn-add-leave-quota').addEventListener('click', () => openLeaveQuotaModal());
+    document.getElementById('btn-add-compensatory').addEventListener('click', () => openCompensatoryModal());
+
+    document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
+    document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
+    ['overtime-date', 'overtime-start', 'overtime-end'].forEach(id => document.getElementById(id).addEventListener('input', updateOvertimePreview));
+
+    document.getElementById('leave-quota-cancel').addEventListener('click', closeLeaveQuotaModal);
+    document.getElementById('leave-quota-submit').addEventListener('click', submitLeaveQuota);
+    ['leave-quota-type', 'leave-quota-date', 'leave-quota-hours', 'leave-quota-expires-at'].forEach(id => document.getElementById(id).addEventListener('input', updateLeaveQuotaPreview));
+
+    document.getElementById('compensatory-cancel').addEventListener('click', closeCompensatoryModal);
+    document.getElementById('compensatory-submit').addEventListener('click', submitCompensatory);
+    ['compensatory-date', 'compensatory-hours', 'compensatory-note'].forEach(id => document.getElementById(id).addEventListener('input', updateCompensatoryPreview));
+    document.getElementById('compensatory-source').addEventListener('change', updateCompensatoryPreview);
+    document.getElementById('compensatory-hours').addEventListener('input', refreshCompensatorySourceOptions.bind(null, null));
+
+    document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+    document.getElementById('confirm-ok').addEventListener('click', () => { const cb = confirmCallback; closeConfirm(); if (cb) cb(); });
+
+    document.getElementById('overtime-table-wrap').addEventListener('click', e => {
+      const t = e.target;
+      if (t.dataset.editOt) openOvertimeModal(t.dataset.editOt);
+      else if (t.dataset.delOt) confirmDeleteOvertime(t.dataset.delOt);
+    });
+    document.getElementById('leave-quota-table-wrap').addEventListener('click', e => {
+      const t = e.target;
+      if (t.dataset.editLq) openLeaveQuotaModal(t.dataset.editLq);
+      else if (t.dataset.delLq) confirmDeleteLeaveQuota(t.dataset.delLq);
+    });
+    document.getElementById('compensatory-table-wrap').addEventListener('click', e => {
+      const t = e.target;
+      if (t.dataset.editCp) openCompensatoryModal(t.dataset.editCp);
+      else if (t.dataset.delCp) confirmDeleteCompensatory(t.dataset.delCp);
+    });
+
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); }));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') document.querySelectorAll('.modal:not(.hidden)').forEach(m => m.classList.add('hidden'));
     });
   }
 
   // ---------- 初始化 ----------
   bindEvents();
   bindAuthEvents();
-  migrateOvertime();
-  if (isAuthed()) {
-    hideAuthOverlay();
-  }
+  migrateData();
+  if (isAuthed()) hideAuthOverlay();
 })();
 </script>
 </body>
