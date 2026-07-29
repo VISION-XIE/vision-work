@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vision Work — 加班调休记录</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --border: #e4e9f0;
+    --text: #1a2332;
+    --text-muted: #6b7689;
+    --primary: #3b5bdb;
+    --primary-hover: #3251c4;
+    --primary-light: #eef1fd;
+    --danger: #e53935;
+    --danger-light: #fdebeb;
+    --warning: #f59f00;
+    --warning-light: #fef4e0;
+    --success: #2f9e44;
+    --success-light: #e7f5ec;
+    --neutral: #868e96;
+    --neutral-light: #f1f3f5;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    font-size: 14px;
+    padding: 24px 16px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 1100px; margin: 0 auto; }
+  .app-header { margin-bottom: 24px; }
+  .app-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .app-header .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* Dashboard */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .balance-card { display: flex; flex-direction: column; gap: 6px; }
+  .balance-label { color: var(--text-muted); font-size: 13px; }
+  .balance-value {
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .balance-value span {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .balance-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .balance-meta strong { color: var(--warning); font-weight: 600; }
+
+  .expiry-card .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .expiry-list { display: flex; flex-direction: column; gap: 10px; }
+  .expiry-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--bg);
+    border-left: 3px solid var(--warning);
+  }
+  .expiry-item.urgent { border-left-color: var(--danger); }
+  .expiry-item-info { display: flex; flex-direction: column; gap: 2px; }
+  .expiry-date { font-weight: 600; font-size: 13px; }
+  .expiry-detail { font-size: 12px; color: var(--text-muted); }
+  .expiry-countdown { font-size: 12px; font-weight: 600; color: var(--warning); white-space: nowrap; }
+  .expiry-countdown.urgent { color: var(--danger); }
+  .empty-hint { color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px 0; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .tab {
+    background: none;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .tab-header h2 { font-size: 18px; font-weight: 600; }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .btn.primary:hover { background: var(--primary-hover); }
+  .btn.danger { color: var(--danger); border-color: var(--border); }
+  .btn.danger:hover { background: var(--danger-light); border-color: var(--danger); }
+  .btn.ghost {
+    background: transparent;
+    border-color: transparent;
+    padding: 4px 10px;
+    color: var(--text-muted);
+  }
+  .btn.ghost:hover { background: var(--bg); color: var(--text); }
+  .btn.ghost.danger:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 12px 16px; font-size: 13px; vertical-align: middle; }
+  th {
+    background: var(--bg);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tbody tr + tr { border-top: 1px solid var(--border); }
+  tbody tr:hover { background: var(--primary-light); }
+  .col-time, .col-duration, .col-expires, .col-status, .col-actions { white-space: nowrap; }
+  .col-actions { text-align: right; }
+
+  /* Status badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge.available { background: var(--success-light); color: var(--success); }
+  .badge.expiring { background: var(--warning-light); color: var(--warning); }
+  .badge.expired { background: var(--danger-light); color: var(--danger); }
+  .badge.exhausted { background: var(--neutral-light); color: var(--neutral); }
+  .badge.invalid { background: var(--neutral-light); color: var(--neutral); }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .modal.hidden { display: none; }
+  .modal-content {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 24px 28px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h3 { font-size: 18px; margin-bottom: 18px; font-weight: 600; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .form-group input, .form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    color: var(--text);
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  .form-group textarea { resize: vertical; min-height: 64px; }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .form-preview {
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .form-preview strong { color: var(--text); font-weight: 600; }
+  .form-preview.warning { background: var(--warning-light); color: var(--warning); }
+  .form-preview.error { background: var(--danger-light); color: var(--danger); }
+  .form-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-bottom: 14px;
+    padding: 8px 12px;
+    background: var(--danger-light);
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .form-error.hidden { display: none; }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  /* Consumed breakdown */
+  .consumed-detail { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+  .consumed-detail .line { display: block; }
+  .consumed-detail .line.orphan { color: var(--danger); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 56px 16px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
+
+  .confirm-message {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 18px;
+    white-space: pre-wrap;
+  }
+
+  /* Auth overlay */
+  .auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 16px;
+  }
+  .auth-overlay.hidden { display: none; }
+  .auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .auth-card h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+  .auth-subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .auth-form input {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    color: var(--text);
+    text-align: center;
+  }
+  .auth-form input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  .auth-form .btn { width: 100%; padding: 10px; }
+
+  @media (max-width: 720px) {
+    .dashboard { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    table { font-size: 12px; }
+    th, td { padding: 10px 12px; }
+    .app-header h1 { font-size: 24px; }
+    .balance-value { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card">
+    <h2>Vision Work</h2>
+    <p class="auth-subtitle">加班调休记录 · 请输入访问口令</p>
+    <div class="form-error hidden" id="auth-error"></div>
+    <div class="auth-form">
+      <input type="password" id="auth-input" placeholder="口令" autocomplete="current-password" autofocus>
+      <button type="button" class="btn primary" id="auth-submit">进入</button>
+    </div>
+  </div>
+</div>
+<div class="app">
+  <header class="app-header">
+    <h1>Vision Work</h1>
+    <p class="subtitle">加班调休记录</p>
+  </header>
+
+  <section class="dashboard">
+    <div class="card balance-card">
+      <div class="balance-label">当前可用调休</div>
+      <div class="balance-value" id="balance-value">0.0 <span>小时</span></div>
+      <div class="balance-meta" id="balance-meta">暂无加班记录</div>
+    </div>
+    <div class="card expiry-card">
+      <div class="card-title">即将过期（14 天内）</div>
+      <div class="expiry-list" id="expiry-list"></div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="overtime">加班记录</button>
+    <button class="tab" data-tab="compensatory">调休记录</button>
+    <button class="tab" data-tab="pool">额度池</button>
+  </nav>
+
+  <section class="tab-content active" id="tab-overtime">
+    <div class="tab-header">
+      <h2>加班记录</h2>
+      <button class="btn primary" id="btn-add-overtime">+ 新增加班</button>
+    </div>
+    <div class="table-wrap" id="overtime-table-wrap"></div>
+  </section>
+
+  <section class="tab-content" id="tab-compensatory">
+    <div class="tab-header">
+      <h2>调休记录</h2>
+      <button class="btn primary" id="btn-add-compensatory">+ 新增调休</button>
+    </div>
+    <div class="table-wrap" id="compensatory-table-wrap"></div>
+  </section>
+
+  <section class="tab-content" id="tab-pool">
+    <div class="tab-header">
+      <h2>调休额度池</h2>
+    </div>
+    <div class="table-wrap" id="pool-table-wrap"></div>
+  </section>
+</div>
+
+<div class="modal hidden" id="overtime-modal">
+  <div class="modal-content">
+    <h3 id="overtime-modal-title">新增加班</h3>
+    <div class="form-error hidden" id="overtime-form-error"></div>
+    <form id="overtime-form" onsubmit="return false">
+      <input type="hidden" id="overtime-id">
+      <div class="form-group">
+        <label>加班日期</label>
+        <input type="date" id="overtime-date">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>开始时间</label>
+          <input type="time" id="overtime-start">
+        </div>
+        <div class="form-group">
+          <label>结束时间</label>
+          <input type="time" id="overtime-end">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>备注（可选）</label>
+        <textarea id="overtime-note" placeholder="如：项目上线紧急支援"></textarea>
+      </div>
+      <div class="form-preview" id="overtime-preview">加班时长：—</div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="overtime-cancel">取消</button>
+        <button type="button" class="btn primary" id="overtime-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal hidden" id="compensatory-modal">
+  <div class="modal-content">
+    <h3 id="compensatory-modal-title">新增调休</h3>
+    <div class="form-error hidden" id="compensatory-form-error"></div>
+    <form id="compensatory-form" onsubmit="return false">
+      <input type="hidden" id="compensatory-id">
+      <div class="form-group">
+        <label>调休日期</label>
+        <input type="date" id="compensatory-date">
+      </div>
+      <div class="form-group">
+        <label>调休小时数</label>
+        <input type="number" id="compensatory-hours" step="0.5" min="0.5" placeholder="如 1.5">
+      </div>
+      <div class="form-group">
+        <label>备注（可选）</label>
+        <textarea id="compensatory-note" placeholder="如：事假半天"></textarea>
+      </div>
+      <div class="form-preview" id="compensatory-preview">当前可用：—</div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="compensatory-cancel">取消</button>
+        <button type="button" class="btn primary" id="compensatory-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal hidden" id="confirm-modal">
+  <div class="modal-content">
+    <h3 id="confirm-title">确认</h3>
+    <div class="confirm-message" id="confirm-message"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="confirm-cancel">取消</button>
+      <button type="button" class="btn danger" id="confirm-ok">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ---------- 工具 ----------
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function todayStr() { return formatDate(new Date()); }
+  function nowTimeStr() {
+    const d = new Date();
+    return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+  function parseDateStr(s) {
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function formatDate(d) {
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function addMonths(d, n) {
+    const r = new Date(d);
+    r.setMonth(r.getMonth() + n);
+    return r;
+  }
+  function startOfDay(d) {
+    const r = new Date(d);
+    r.setHours(0, 0, 0, 0);
+    return r;
+  }
+  function daysBetween(a, b) {
+    const aT = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
+    const bT = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
+    return Math.floor((bT - aT) / 86400000);
+  }
+  function parseTimeToMin(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  }
+  function formatHours(minutes) {
+    return (minutes / 60).toFixed(1);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function weekdayCN(dateStr) {
+    return ['日','一','二','三','四','五','六'][parseDateStr(dateStr).getDay()];
+  }
+
+  const OT_START_MIN = 18 * 60 + 30; // 18:30
+  const MIN_VALID_MINUTES = 30;     // 30 分钟起算
+
+  function computeOvertimeMinutes(start, end) {
+    const s = parseTimeToMin(start);
+    const e = parseTimeToMin(end);
+    if (e < s) return 0; // 跨日不处理
+    const effectiveStart = Math.max(s, OT_START_MIN);
+    return Math.max(0, e - effectiveStart);
+  }
+  function getExpireDate(otDate) {
+    return addMonths(parseDateStr(otDate), 2);
+  }
+
+  // ---------- 数据层 ----------
+  const LS_KEY_OT = 'vision-work:overtime';
+  const LS_KEY_CP = 'vision-work:compensatory';
+
+  function loadOvertime() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY_OT) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveOvertime(list) { localStorage.setItem(LS_KEY_OT, JSON.stringify(list)); }
+  function loadCompensatory() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY_CP) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveCompensatory(list) { localStorage.setItem(LS_KEY_CP, JSON.stringify(list)); }
+
+  // ---------- 池计算 ----------
+  function getConsumedByOvertimeId(otId, excludeCpId) {
+    const list = loadCompensatory();
+    let total = 0;
+    for (const cp of list) {
+      if (excludeCpId && cp.id === excludeCpId) continue;
+      if (!cp.consumed) continue;
+      for (const c of cp.consumed) {
+        if (c.overtimeId === otId) total += c.minutes;
+      }
+    }
+    return total;
+  }
+
+  function getPool(ot, excludeCpId) {
+    const consumed = getConsumedByOvertimeId(ot.id, excludeCpId);
+    const total = ot.minutes;
+    const available = Math.max(0, total - consumed);
+    const expiresAt = getExpireDate(ot.date);
+    const today = startOfDay(new Date());
+    const daysLeft = daysBetween(today, new Date(expiresAt));
+    let status;
+    if (total === 0) {
+      status = 'invalid';
+    } else if (available === 0) {
+      status = daysLeft < 0 ? 'expired' : 'exhausted';
+    } else if (daysLeft < 0) {
+      status = 'expired';
+    } else if (daysLeft <= 14) {
+      status = 'expiring';
+    } else {
+      status = 'available';
+    }
+    return { id: ot.id, date: ot.date, expiresAt, total, consumed, available, status, daysLeft, source: ot };
+  }
+
+  function getAllPools(excludeCpId) {
+    return loadOvertime().map(ot => getPool(ot, excludeCpId));
+  }
+
+  function getAvailableTotal(excludeCpId) {
+    return getAllPools(excludeCpId)
+      .filter(p => p.available > 0 && p.status !== 'expired')
+      .reduce((s, p) => s + p.available, 0);
+  }
+
+  function consumeByFifo(minutes, excludeCpId) {
+    const pools = getAllPools(excludeCpId)
+      .filter(p => p.available > 0 && p.status !== 'expired')
+      .sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)));
+
+    const availableTotal = pools.reduce((s, p) => s + p.available, 0);
+    if (availableTotal < minutes) {
+      throw new Error('可用调休不足，当前仅 ' + formatHours(availableTotal) + ' 小时');
+    }
+
+    const consumed = [];
+    let need = minutes;
+    for (const p of pools) {
+      if (need <= 0) break;
+      const take = Math.min(p.available, need);
+      consumed.push({ overtimeId: p.id, minutes: take });
+      need -= take;
+    }
+    return consumed;
+  }
+
+  // ---------- CRUD ----------
+  function createOvertime({ date, start, end, note }) {
+    const minutes = computeOvertimeMinutes(start, end);
+    const ot = { id: uid(), date, start, end, minutes, note, createdAt: new Date().toISOString() };
+    const list = loadOvertime();
+    list.push(ot);
+    saveOvertime(list);
+    return ot;
+  }
+
+  function updateOvertime(id, patch) {
+    const list = loadOvertime();
+    const i = list.findIndex(x => x.id === id);
+    if (i < 0) throw new Error('加班记录不存在');
+    const merged = { ...list[i], ...patch };
+    if (patch.start || patch.end) {
+      merged.minutes = computeOvertimeMinutes(merged.start, merged.end);
+    }
+    const consumed = getConsumedByOvertimeId(id);
+    if (merged.minutes < consumed) {
+      throw new Error('新的加班时长 ' + formatHours(merged.minutes) + 'h 不足以覆盖已消耗的 ' + formatHours(consumed) + 'h 调休，请先删除相关调休或调整时间');
+    }
+    list[i] = merged;
+    saveOvertime(list);
+  }
+
+  function deleteOvertimeCascade(id) {
+    const cps = loadCompensatory();
+    const remaining = cps.filter(cp => !(cp.consumed && cp.consumed.some(c => c.overtimeId === id)));
+    saveCompensatory(remaining);
+    saveOvertime(loadOvertime().filter(x => x.id !== id));
+  }
+
+  function createCompensatory({ date, hours, note }) {
+    const minutes = Math.round(hours * 60);
+    const consumed = consumeByFifo(minutes);
+    const cp = {
+      id: uid(),
+      date, hours, minutes, note, consumed,
+      createdAt: new Date().toISOString()
+    };
+    const list = loadCompensatory();
+    list.push(cp);
+    saveCompensatory(list);
+    return cp;
+  }
+
+  function updateCompensatory(id, patch) {
+    const list = loadCompensatory();
+    const i = list.findIndex(x => x.id === id);
+    if (i < 0) throw new Error('调休记录不存在');
+    const old = list[i];
+    const newHours = patch.hours != null ? patch.hours : old.hours;
+    const newMinutes = Math.round(newHours * 60);
+    const newConsumed = consumeByFifo(newMinutes, id); // 排除自身后重新分配
+    list[i] = { ...old, ...patch, hours: newHours, minutes: newMinutes, consumed: newConsumed };
+    saveCompensatory(list);
+  }
+
+  function deleteCompensatory(id) {
+    saveCompensatory(loadCompensatory().filter(x => x.id !== id));
+  }
+
+  // ---------- 渲染 ----------
+  function statusLabel(s) {
+    return ({
+      available: '可用',
+      expiring: '即将过期',
+      expired: '已过期',
+      exhausted: '已用完',
+      invalid: '无效'
+    })[s] || s;
+  }
+
+  function renderAll() {
+    renderDashboard();
+    renderOvertimeList();
+    renderCompensatoryList();
+    renderPoolList();
+  }
+
+  function renderDashboard() {
+    const total = getAvailableTotal();
+    document.getElementById('balance-value').innerHTML = formatHours(total) + ' <span>小时</span>';
+
+    const pools = getAllPools();
+    const validPools = pools.filter(p => p.available > 0 && p.status !== 'expired' && p.status !== 'invalid');
+    const expiringPools = validPools.filter(p => p.status === 'expiring');
+
+    document.getElementById('balance-meta').innerHTML =
+      validPools.length === 0
+        ? '暂无可用调休'
+        : '共 <strong>' + validPools.length + '</strong> 笔未过期加班' +
+          (expiringPools.length > 0 ? ' · <strong>' + expiringPools.length + '</strong> 笔即将过期' : '');
+
+    const wrap = document.getElementById('expiry-list');
+    if (expiringPools.length === 0) {
+      wrap.innerHTML = '<div class="empty-hint">14 天内无调休过期</div>';
+    } else {
+      expiringPools.sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)));
+      wrap.innerHTML = expiringPools.map(p => {
+        const days = p.daysLeft;
+        const urgent = days <= 7;
+        return '<div class="expiry-item' + (urgent ? ' urgent' : '') + '">' +
+          '<div class="expiry-item-info">' +
+            '<div class="expiry-date">' + formatDate(new Date(p.expiresAt)) + ' 过期</div>' +
+            '<div class="expiry-detail">加班日 ' + p.date + ' · 剩余 ' + formatHours(p.available) + 'h</div>' +
+          '</div>' +
+          '<div class="expiry-countdown' + (urgent ? ' urgent' : '') + '">' + (days === 0 ? '今天' : days + ' 天后') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  function renderOvertimeList() {
+    const list = loadOvertime().slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    const wrap = document.getElementById('overtime-table-wrap');
+    if (list.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><div class="icon">📋</div>暂无加班记录，点击右上角「新增加班」开始记录</div>';
+      return;
+    }
+    const poolMap = Object.fromEntries(getAllPools().map(p => [p.id, p]));
+    const rows = list.map(ot => {
+      const p = poolMap[ot.id];
+      return '<tr>' +
+        '<td>' + ot.date + ' 周' + weekdayCN(ot.date) + '</td>' +
+        '<td class="col-time">' + ot.start + ' – ' + ot.end + '</td>' +
+        '<td class="col-duration">' + formatHours(ot.minutes) + 'h</td>' +
+        '<td class="col-expires">' + formatDate(new Date(p.expiresAt)) + '</td>' +
+        '<td>' + formatHours(p.available) + 'h / ' + formatHours(p.total) + 'h</td>' +
+        '<td class="col-status"><span class="badge ' + p.status + '">' + statusLabel(p.status) + '</span></td>' +
+        '<td class="col-actions">' +
+          '<button class="btn ghost" data-edit-ot="' + ot.id + '">编辑</button>' +
+          '<button class="btn ghost danger" data-del-ot="' + ot.id + '">删除</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<table>' +
+      '<thead><tr>' +
+        '<th>日期</th><th>时段</th><th>加班</th><th>过期日</th><th>剩余/产生</th><th>状态</th><th class="col-actions">操作</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>';
+  }
+
+  function renderCompensatoryList() {
+    const list = loadCompensatory().slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    const wrap = document.getElementById('compensatory-table-wrap');
+    if (list.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><div class="icon">🌴</div>暂无调休记录</div>';
+      return;
+    }
+    const otMap = Object.fromEntries(loadOvertime().map(o => [o.id, o]));
+    const rows = list.map(cp => {
+      const consumedDetail = (cp.consumed || []).map(c => {
+        const ot = otMap[c.overtimeId];
+        const otDate = ot ? (ot.date + ' 周' + weekdayCN(ot.date)) : '(加班已删除)';
+        const cls = ot ? 'line' : 'line orphan';
+        return '<span class="' + cls + '">· ' + otDate + ' 扣减 ' + formatHours(c.minutes) + 'h</span>';
+      }).join('') || '<span class="line">（无消耗明细）</span>';
+
+      return '<tr>' +
+        '<td>' + cp.date + ' 周' + weekdayCN(cp.date) + '</td>' +
+        '<td class="col-duration">' + formatHours(cp.minutes) + 'h</td>' +
+        '<td><div class="consumed-detail">' + consumedDetail + '</div></td>' +
+        '<td>' + escapeHtml(cp.note || '') + '</td>' +
+        '<td class="col-actions">' +
+          '<button class="btn ghost" data-edit-cp="' + cp.id + '">编辑</button>' +
+          '<button class="btn ghost danger" data-del-cp="' + cp.id + '">删除</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<table>' +
+      '<thead><tr>' +
+        '<th>日期</th><th>调休</th><th>FIFO 消耗详情</th><th>备注</th><th class="col-actions">操作</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>';
+  }
+
+  function renderPoolList() {
+    const pools = getAllPools().slice().sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)));
+    const wrap = document.getElementById('pool-table-wrap');
+    if (pools.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><div class="icon">💧</div>暂无调休额度</div>';
+      return;
+    }
+    const rows = pools.map(p => {
+      return '<tr>' +
+        '<td>' + p.date + ' 周' + weekdayCN(p.date) + '</td>' +
+        '<td class="col-expires">' + formatDate(new Date(p.expiresAt)) + '</td>' +
+        '<td>' + (p.daysLeft >= 0 ? p.daysLeft + ' 天' : '已过期 ' + (-p.daysLeft) + ' 天') + '</td>' +
+        '<td class="col-duration">' + formatHours(p.total) + 'h</td>' +
+        '<td>' + formatHours(p.consumed) + 'h</td>' +
+        '<td>' + formatHours(p.available) + 'h</td>' +
+        '<td class="col-status"><span class="badge ' + p.status + '">' + statusLabel(p.status) + '</span></td>' +
+      '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<table>' +
+      '<thead><tr>' +
+        '<th>加班日</th><th>过期日</th><th>剩余天数</th><th>产生</th><th>已消耗</th><th>剩余</th><th>状态</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>';
+  }
+
+  // ---------- Modal: 加班 ----------
+  function openOvertimeModal(id) {
+    const title = document.getElementById('overtime-modal-title');
+    const errorEl = document.getElementById('overtime-form-error');
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+
+    if (id) {
+      const ot = loadOvertime().find(x => x.id === id);
+      if (!ot) return;
+      title.textContent = '编辑加班';
+      document.getElementById('overtime-id').value = ot.id;
+      document.getElementById('overtime-date').value = ot.date;
+      document.getElementById('overtime-start').value = ot.start;
+      document.getElementById('overtime-end').value = ot.end;
+      document.getElementById('overtime-note').value = ot.note || '';
+    } else {
+      title.textContent = '新增加班';
+      document.getElementById('overtime-id').value = '';
+      document.getElementById('overtime-date').value = todayStr();
+      document.getElementById('overtime-start').value = '18:30';
+      const now = nowTimeStr();
+      document.getElementById('overtime-end').value = now < '18:30' ? '19:00' : now;
+      document.getElementById('overtime-note').value = '';
+    }
+    updateOvertimePreview();
+    document.getElementById('overtime-modal').classList.remove('hidden');
+  }
+  function closeOvertimeModal() { document.getElementById('overtime-modal').classList.add('hidden'); }
+
+  function updateOvertimePreview() {
+    const date = document.getElementById('overtime-date').value;
+    const start = document.getElementById('overtime-start').value;
+    const end = document.getElementById('overtime-end').value;
+    const preview = document.getElementById('overtime-preview');
+
+    if (!date || !start || !end) {
+      preview.textContent = '加班时长：—';
+      preview.className = 'form-preview';
+      return;
+    }
+    const minutes = computeOvertimeMinutes(start, end);
+    const expireDate = formatDate(getExpireDate(date));
+    const wd = weekdayCN(date);
+    const isWeekend = (wd === '六' || wd === '日');
+
+    let prefix = '加班日期 周' + wd;
+    if (isWeekend) prefix += '（周末，按规则只记录工作日加班）';
+
+    if (end < start) {
+      preview.textContent = prefix + ' · 结束时间不能早于开始时间';
+      preview.className = 'form-preview error';
+      return;
+    }
+    if (minutes < MIN_VALID_MINUTES) {
+      preview.textContent = prefix + ' · 加班时长 ' + minutes + ' 分钟，不足 30 分钟不计入调休';
+      preview.className = 'form-preview error';
+      return;
+    }
+    preview.innerHTML = prefix + ' · 加班时长 <strong>' + formatHours(minutes) + ' 小时</strong> · 调休过期日 <strong>' + expireDate + '</strong>';
+    preview.className = isWeekend ? 'form-preview warning' : 'form-preview';
+  }
+
+  function submitOvertime() {
+    const id = document.getElementById('overtime-id').value;
+    const date = document.getElementById('overtime-date').value;
+    const start = document.getElementById('overtime-start').value;
+    const end = document.getElementById('overtime-end').value;
+    const note = document.getElementById('overtime-note').value.trim();
+    const errorEl = document.getElementById('overtime-form-error');
+
+    if (!date || !start || !end) {
+      showFormError(errorEl, '请填写完整的日期和时间');
+      return;
+    }
+    if (end < start) {
+      showFormError(errorEl, '结束时间不能早于开始时间');
+      return;
+    }
+    const minutes = computeOvertimeMinutes(start, end);
+    if (minutes < MIN_VALID_MINUTES) {
+      showFormError(errorEl, '加班时长仅 ' + minutes + ' 分钟，需 ≥ 30 分钟才计入调休');
+      return;
+    }
+    try {
+      if (id) updateOvertime(id, { date, start, end, note });
+      else createOvertime({ date, start, end, note });
+      closeOvertimeModal();
+      renderAll();
+    } catch (e) {
+      showFormError(errorEl, e.message);
+    }
+  }
+
+  function showFormError(el, msg) {
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function confirmDeleteOvertime(id) {
+    const ot = loadOvertime().find(x => x.id === id);
+    if (!ot) return;
+    const affected = loadCompensatory().filter(cp => cp.consumed && cp.consumed.some(c => c.overtimeId === id));
+    let msg = '确定删除加班记录 ' + ot.date + ' 周' + weekdayCN(ot.date) + '（' + formatHours(ot.minutes) + 'h）吗？';
+    if (affected.length > 0) {
+      msg += '\n\n此加班已被 ' + affected.length + ' 笔调休消耗：\n' +
+        affected.map(c => '  · ' + c.date + ' ' + formatHours(c.minutes) + 'h').join('\n') +
+        '\n\n删除此加班将同时删除这 ' + affected.length + ' 笔调休记录。';
+    }
+    showConfirm('删除加班', msg, () => {
+      deleteOvertimeCascade(id);
+      renderAll();
+    });
+  }
+
+  // ---------- Modal: 调休 ----------
+  function openCompensatoryModal(id) {
+    const title = document.getElementById('compensatory-modal-title');
+    const errorEl = document.getElementById('compensatory-form-error');
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+
+    if (id) {
+      const cp = loadCompensatory().find(x => x.id === id);
+      if (!cp) return;
+      title.textContent = '编辑调休';
+      document.getElementById('compensatory-id').value = cp.id;
+      document.getElementById('compensatory-date').value = cp.date;
+      document.getElementById('compensatory-hours').value = cp.hours;
+      document.getElementById('compensatory-note').value = cp.note || '';
+    } else {
+      title.textContent = '新增调休';
+      document.getElementById('compensatory-id').value = '';
+      document.getElementById('compensatory-date').value = todayStr();
+      document.getElementById('compensatory-hours').value = '';
+      document.getElementById('compensatory-note').value = '';
+    }
+    updateCompensatoryPreview();
+    document.getElementById('compensatory-modal').classList.remove('hidden');
+  }
+  function closeCompensatoryModal() { document.getElementById('compensatory-modal').classList.add('hidden'); }
+
+  function updateCompensatoryPreview() {
+    const id = document.getElementById('compensatory-id').value;
+    const hoursStr = document.getElementById('compensatory-hours').value;
+    const hours = parseFloat(hoursStr);
+    const preview = document.getElementById('compensatory-preview');
+    const available = getAvailableTotal(id) / 60;
+
+    if (isNaN(hours) || hours <= 0) {
+      preview.innerHTML = '当前可用：<strong>' + formatHours(available * 60) + ' 小时</strong>';
+      preview.className = 'form-preview';
+      return;
+    }
+    if (hours > available) {
+      preview.innerHTML = '申请 <strong>' + hours + 'h</strong> · 当前可用 <strong>' + formatHours(available * 60) + 'h</strong> · 余额不足';
+      preview.className = 'form-preview error';
+    } else {
+      preview.innerHTML = '申请 <strong>' + hours + 'h</strong> · 当前可用 <strong>' + formatHours(available * 60) + 'h</strong> · 余额充足';
+      preview.className = 'form-preview';
+    }
+  }
+
+  function submitCompensatory() {
+    const id = document.getElementById('compensatory-id').value;
+    const date = document.getElementById('compensatory-date').value;
+    const hours = parseFloat(document.getElementById('compensatory-hours').value);
+    const note = document.getElementById('compensatory-note').value.trim();
+    const errorEl = document.getElementById('compensatory-form-error');
+
+    if (!date) { showFormError(errorEl, '请填写调休日期'); return; }
+    if (isNaN(hours) || hours <= 0) { showFormError(errorEl, '请填写有效的小时数'); return; }
+
+    try {
+      if (id) updateCompensatory(id, { date, hours, note });
+      else createCompensatory({ date, hours, note });
+      closeCompensatoryModal();
+      renderAll();
+    } catch (e) {
+      showFormError(errorEl, e.message);
+    }
+  }
+
+  function confirmDeleteCompensatory(id) {
+    const cp = loadCompensatory().find(x => x.id === id);
+    if (!cp) return;
+    showConfirm('删除调休',
+      '确定删除调休记录 ' + cp.date + ' 周' + weekdayCN(cp.date) + '（' + formatHours(cp.minutes) + 'h）吗？\n\n删除后，此调休已扣减的额度会归还到对应加班池。',
+      () => { deleteCompensatory(id); renderAll(); });
+  }
+
+  // ---------- 通用确认 Modal ----------
+  let confirmCallback = null;
+  function showConfirm(title, message, callback) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-modal').classList.remove('hidden');
+    confirmCallback = callback;
+  }
+  function closeConfirm() {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    confirmCallback = null;
+  }
+
+  // ---------- Tab 切换 ----------
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.tab-content').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
+  }
+
+  // ---------- 事件绑定 ----------
+  function bindEvents() {
+    document.querySelectorAll('.tab').forEach(b => {
+      b.addEventListener('click', () => switchTab(b.dataset.tab));
+    });
+
+    document.getElementById('btn-add-overtime').addEventListener('click', () => openOvertimeModal());
+    document.getElementById('btn-add-compensatory').addEventListener('click', () => openCompensatoryModal());
+
+    document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
+    document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
+    ['overtime-date', 'overtime-start', 'overtime-end'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateOvertimePreview);
+    });
+
+    document.getElementById('compensatory-cancel').addEventListener('click', closeCompensatoryModal);
+    document.getElementById('compensatory-submit').addEventListener('click', submitCompensatory);
+    document.getElementById('compensatory-hours').addEventListener('input', updateCompensatoryPreview);
+
+    document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+    document.getElementById('confirm-ok').addEventListener('click', () => {
+      const cb = confirmCallback;
+      closeConfirm();
+      if (cb) cb();
+    });
+
+    // 列表内按钮（事件委托）
+    document.getElementById('overtime-table-wrap').addEventListener('click', e => {
+      const t = e.target;
+      if (t.dataset.editOt) openOvertimeModal(t.dataset.editOt);
+      else if (t.dataset.delOt) confirmDeleteOvertime(t.dataset.delOt);
+    });
+    document.getElementById('compensatory-table-wrap').addEventListener('click', e => {
+      const t = e.target;
+      if (t.dataset.editCp) openCompensatoryModal(t.dataset.editCp);
+      else if (t.dataset.delCp) confirmDeleteCompensatory(t.dataset.delCp);
+    });
+
+    // 点击 modal 背景关闭
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); });
+    });
+    // ESC 关闭
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal:not(.hidden)').forEach(m => m.classList.add('hidden'));
+      }
+    });
+  }
+
+  // ---------- 口令保护 ----------
+  const PASSWORD_HASH = 'a2d194c09903827411a91bf62e2c3cc7a23e8f9665da868c155d57637621d558';
+  const AUTH_KEY = 'vision-work:auth';
+
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  function isAuthed() {
+    try { return sessionStorage.getItem(AUTH_KEY) === '1'; }
+    catch(e) { return false; }
+  }
+  async function tryAuth(password) {
+    const hash = await sha256Hex(password);
+    if (hash === PASSWORD_HASH) {
+      try { sessionStorage.setItem(AUTH_KEY, '1'); } catch(e) {}
+      return true;
+    }
+    return false;
+  }
+  function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+  function hideAuthOverlay() {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    renderAll();
+  }
+  function bindAuthEvents() {
+    const input = document.getElementById('auth-input');
+    const submit = document.getElementById('auth-submit');
+    submit.addEventListener('click', async () => {
+      const ok = await tryAuth(input.value);
+      if (ok) {
+        hideAuthOverlay();
+      } else {
+        showAuthError('口令错误，请重试');
+        input.value = '';
+        input.focus();
+      }
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submit.click();
+    });
+  }
+
+  // ---------- 初始化 ----------
+  bindEvents();
+  bindAuthEvents();
+  if (isAuthed()) {
+    hideAuthOverlay();
+  }
+})();
+</script>
+</body>
+</html>
