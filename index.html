@@ -557,12 +557,16 @@
   const OT_START_MIN = 18 * 60 + 30; // 18:30
   const MIN_VALID_MINUTES = 30;     // 30 分钟起算
 
-  function computeOvertimeMinutes(start, end) {
+  function computeOvertimeRawMinutes(start, end) {
     const s = parseTimeToMin(start);
     const e = parseTimeToMin(end);
     if (e < s) return 0; // 跨日不处理
     const effectiveStart = Math.max(s, OT_START_MIN);
     return Math.max(0, e - effectiveStart);
+  }
+  function computeOvertimeMinutes(start, end) {
+    // 按 30 分钟向下取整（如 18:30-21:29 算到 21:00，即 2.5h）
+    return Math.floor(computeOvertimeRawMinutes(start, end) / 30) * 30;
   }
   function getExpireDate(otDate) {
     return addMonths(parseDateStr(otDate), 2);
@@ -582,6 +586,20 @@
     catch(e) { return []; }
   }
   function saveCompensatory(list) { localStorage.setItem(LS_KEY_CP, JSON.stringify(list)); }
+
+  // 数据迁移：按 30 分钟向下取整规则重算历史加班记录
+  function migrateOvertime() {
+    const list = loadOvertime();
+    let dirty = false;
+    for (const ot of list) {
+      const recomputed = computeOvertimeMinutes(ot.start, ot.end);
+      if (ot.minutes !== recomputed) {
+        ot.minutes = recomputed;
+        dirty = true;
+      }
+    }
+    if (dirty) saveOvertime(list);
+  }
 
   // ---------- 池计算 ----------
   function getConsumedByOvertimeId(otId, excludeCpId) {
@@ -900,6 +918,7 @@
       preview.className = 'form-preview';
       return;
     }
+    const raw = computeOvertimeRawMinutes(start, end);
     const minutes = computeOvertimeMinutes(start, end);
     const expireDate = formatDate(getExpireDate(date));
     const wd = weekdayCN(date);
@@ -914,11 +933,12 @@
       return;
     }
     if (minutes < MIN_VALID_MINUTES) {
-      preview.textContent = prefix + ' · 加班时长 ' + minutes + ' 分钟，不足 30 分钟不计入调休';
+      preview.textContent = prefix + ' · 实际加班 ' + raw + ' 分钟，不足 30 分钟不计入调休';
       preview.className = 'form-preview error';
       return;
     }
-    preview.innerHTML = prefix + ' · 加班时长 <strong>' + formatHours(minutes) + ' 小时</strong> · 调休过期日 <strong>' + expireDate + '</strong>';
+    const note = (raw === minutes) ? '' : '（按 30 分钟向下取整，实际 ' + raw + ' 分钟）';
+    preview.innerHTML = prefix + ' · 加班时长 <strong>' + formatHours(minutes) + ' 小时</strong>' + note + ' · 调休过期日 <strong>' + expireDate + '</strong>';
     preview.className = isWeekend ? 'form-preview warning' : 'form-preview';
   }
 
@@ -940,7 +960,8 @@
     }
     const minutes = computeOvertimeMinutes(start, end);
     if (minutes < MIN_VALID_MINUTES) {
-      showFormError(errorEl, '加班时长仅 ' + minutes + ' 分钟，需 ≥ 30 分钟才计入调休');
+      const raw = computeOvertimeRawMinutes(start, end);
+      showFormError(errorEl, '实际加班 ' + raw + ' 分钟，按 30 分钟取整后为 0，不计入调休');
       return;
     }
     try {
@@ -1169,6 +1190,7 @@
   // ---------- 初始化 ----------
   bindEvents();
   bindAuthEvents();
+  migrateOvertime();
   if (isAuthed()) {
     hideAuthOverlay();
   }
