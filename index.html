@@ -111,6 +111,7 @@
     margin-bottom: 14px;
   }
   .tab-header h2 { font-size: 18px; font-weight: 600; }
+  .tab-actions { display: flex; gap: 8px; align-items: center; }
 
   /* Buttons */
   .btn {
@@ -369,7 +370,10 @@
   <section class="tab-content active" id="tab-overtime">
     <div class="tab-header">
       <h2>加班记录</h2>
-      <button class="btn primary" id="btn-add-overtime">+ 新增加班</button>
+      <div class="tab-actions">
+        <button class="btn" id="btn-export-overtime">导出 Excel</button>
+        <button class="btn primary" id="btn-add-overtime">+ 新增加班</button>
+      </div>
     </div>
     <div class="table-wrap" id="overtime-table-wrap"></div>
   </section>
@@ -393,6 +397,9 @@
   <section class="tab-content" id="tab-pool">
     <div class="tab-header">
       <h2>额度池</h2>
+      <div>
+        <button class="btn" id="btn-export-pool">导出 Excel</button>
+      </div>
     </div>
     <div id="pool-overview-wrap"></div>
     <div class="table-wrap" id="pool-table-wrap"></div>
@@ -1070,6 +1077,74 @@
     '</table>';
   }
 
+  // ---------- 导出 Excel ----------
+  function escapeXml(s) {
+    return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  function exportTableToXls(filename, sheetName, headers, rows) {
+    const thead = '<tr>' + headers.map(h => '<th>' + escapeXml(h) + '</th>').join('') + '</tr>';
+    const tbody = rows.map(row =>
+      '<tr>' + row.map(cell => '<td>' + (cell === '' ? '' : escapeXml(cell)) + '</td>').join('') + '</tr>'
+    ).join('');
+    const html =
+      '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+      'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+      'xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta charset="UTF-8">' +
+      '<style>th{font-weight:bold;background:#f1f3f5;} ' +
+      'td{vertical-align:middle;}</style></head><body>' +
+      '<table><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
+      '</body></html>';
+
+    const blob = new Blob(['﻿' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportOvertimeXls() {
+    const list = loadOvertime().slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    const poolMap = Object.fromEntries(getAllPools().map(p => [p.id, p]));
+    const headers = ['日期', '星期', '开始', '结束', '加班(h)', '过期日', '剩余(h)', '产生(h)', '状态'];
+    const rows = list.map(ot => {
+      const p = poolMap[ot.id];
+      return [
+        ot.date,
+        '周' + weekdayCN(ot.date),
+        ot.start,
+        ot.end,
+        formatHours(ot.minutes),
+        formatDate(new Date(p.expiresAt)),
+        formatHours(p.availableMinutes),
+        formatHours(p.totalMinutes),
+        statusLabel(p.status)
+      ];
+    });
+    exportTableToXls('加班记录_' + todayStr() + '.xls', '加班记录', headers, rows);
+  }
+
+  function exportPoolXls() {
+    const pools = getAllPools().slice().sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)));
+    const headers = ['类型', '日期', '过期日', '剩余天数', '产生(h)', '已消耗(h)', '剩余(h)', '状态'];
+    const rows = pools.map(p => [
+      typeLabel(p.type),
+      p.date + ' 周' + weekdayCN(p.date),
+      formatDate(new Date(p.expiresAt)),
+      p.daysLeft >= 0 ? p.daysLeft + ' 天' : '已过期 ' + (-p.daysLeft) + ' 天',
+      formatHours(p.totalMinutes),
+      formatHours(p.consumedMinutes),
+      formatHours(p.availableMinutes),
+      statusLabel(p.status)
+    ]);
+    exportTableToXls('额度池_' + todayStr() + '.xls', '额度池', headers, rows);
+  }
+
   // ---------- Modal: 加班 ----------
   function openOvertimeModal(id) {
     const title = document.getElementById('overtime-modal-title');
@@ -1422,6 +1497,8 @@
     document.getElementById('btn-add-overtime').addEventListener('click', () => openOvertimeModal());
     document.getElementById('btn-add-leave-quota').addEventListener('click', () => openLeaveQuotaModal());
     document.getElementById('btn-add-compensatory').addEventListener('click', () => openCompensatoryModal());
+    document.getElementById('btn-export-overtime').addEventListener('click', exportOvertimeXls);
+    document.getElementById('btn-export-pool').addEventListener('click', exportPoolXls);
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
     document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
