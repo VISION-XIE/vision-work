@@ -357,9 +357,13 @@
       <p class="subtitle">加班调休记录</p>
     </div>
     <div class="app-header-actions">
+      <button class="btn" id="btn-export-data">导出数据</button>
+      <button class="btn" id="btn-import-data">导入数据</button>
       <button class="btn" id="btn-export-report">导出报告</button>
     </div>
   </header>
+
+  <input type="file" id="data-file-input" accept=".json,application/json" style="display:none">
 
   <section class="dashboard">
     <div class="card balance-card">
@@ -1308,6 +1312,67 @@
     URL.revokeObjectURL(url);
   }
 
+  // ---------- 数据导出/导入 JSON ----------
+  function exportDataJson() {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      overtime: loadOvertime(),
+      compensatory: loadCompensatory(),
+      leaveQuota: loadLeaveQuota()
+    };
+    const blob = new Blob(['﻿' + JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vision-work-data_' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function isValidDataPayload(data) {
+    return data && typeof data === 'object' &&
+      Array.isArray(data.overtime) &&
+      Array.isArray(data.compensatory) &&
+      Array.isArray(data.leaveQuota);
+  }
+
+  function importDataJson(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      let data;
+      try {
+        data = JSON.parse(e.target.result);
+      } catch (err) {
+        alert('无法解析该文件：不是有效的 JSON');
+        return;
+      }
+      if (!isValidDataPayload(data)) {
+        alert('文件格式不正确：缺少 overtime / compensatory / leaveQuota 数据');
+        return;
+      }
+      const msg =
+        '导入将覆盖当前全部数据，确定继续吗？\n\n' +
+        '加班记录：' + data.overtime.length + ' 笔\n' +
+        '调休记录：' + data.compensatory.length + ' 笔\n' +
+        '年假/额度：' + data.leaveQuota.length + ' 笔';
+      showConfirm('导入数据', msg, () => {
+        saveOvertime(data.overtime);
+        saveCompensatory(data.compensatory);
+        saveLeaveQuota(data.leaveQuota);
+        migrateData();
+        renderAll();
+        alert('数据导入成功');
+      });
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
   // ---------- Modal: 加班 ----------
   function openOvertimeModal(id) {
     const title = document.getElementById('overtime-modal-title');
@@ -1663,6 +1728,9 @@
     document.getElementById('btn-export-overtime').addEventListener('click', exportOvertimeXls);
     document.getElementById('btn-export-pool').addEventListener('click', exportPoolXls);
     document.getElementById('btn-export-report').addEventListener('click', exportReport);
+    document.getElementById('btn-export-data').addEventListener('click', exportDataJson);
+    document.getElementById('btn-import-data').addEventListener('click', () => document.getElementById('data-file-input').click());
+    document.getElementById('data-file-input').addEventListener('change', importDataJson);
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
     document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
