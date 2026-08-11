@@ -35,9 +35,17 @@
     -webkit-font-smoothing: antialiased;
   }
   .app { max-width: 1100px; margin: 0 auto; }
-  .app-header { margin-bottom: 24px; }
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
   .app-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
   .app-header .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+  .app-header-actions { display: flex; gap: 8px; }
 
   /* Dashboard */
   .dashboard {
@@ -344,8 +352,13 @@
 </div>
 <div class="app">
   <header class="app-header">
-    <h1>Vision Work</h1>
-    <p class="subtitle">加班调休记录</p>
+    <div class="app-header-title">
+      <h1>Vision Work</h1>
+      <p class="subtitle">加班调休记录</p>
+    </div>
+    <div class="app-header-actions">
+      <button class="btn" id="btn-export-report">导出报告</button>
+    </div>
   </header>
 
   <section class="dashboard">
@@ -1145,6 +1158,156 @@
     exportTableToXls('额度池_' + todayStr() + '.xls', '额度池', headers, rows);
   }
 
+  function exportReport() {
+    const today = new Date();
+    const byType = getAvailableByType();
+    const totalAvail = byType.overtime + byType.annual + byType.other;
+    const allPools = getAllPools();
+    const totalOvertime = loadOvertime().reduce((s, o) => s + (o.minutes || 0), 0);
+    const totalComp = loadCompensatory().reduce((s, c) => s + (c.minutes || 0), 0);
+    const totalAnnual = loadLeaveQuota()
+      .filter(l => l.type === 'annual')
+      .reduce((s, l) => s + Math.round((l.hours || 0) * 60), 0);
+    const expiringCount = allPools.filter(p => p.status === 'expiring').length;
+    const expiredCount = allPools.filter(p => p.status === 'expired').length;
+
+    const kpi = (label, value, sub, accent) =>
+      '<div class="kpi"><div class="kpi-value ' + accent + '">' + value + '</div>' +
+      '<div class="kpi-label">' + label + '</div>' +
+      (sub ? '<div class="kpi-sub">' + sub + '</div>' : '') + '</div>';
+
+    // 占比条（复用 getAvailableByType）
+    const ratioBars = (() => {
+      const segs = [
+        { type: 'overtime', label: '加班调休', minutes: byType.overtime, color: '#3b5bdb' },
+        { type: 'annual', label: '年假', minutes: byType.annual, color: '#2f9e44' },
+        { type: 'other', label: '其他', minutes: byType.other, color: '#868e96' }
+      ].filter(s => s.minutes > 0);
+      if (segs.length === 0) {
+        return '<div class="ratio-empty">暂无可用假期额度</div>';
+      }
+      return segs.map(s => {
+        const pct = totalAvail > 0 ? (s.minutes / totalAvail * 100) : 0;
+        return '<div class="ratio-row">' +
+          '<span class="ratio-label">' + s.label + '</span>' +
+          '<div class="ratio-track"><div class="ratio-fill" style="width:' + pct.toFixed(1) + '%;background:' + s.color + '"></div></div>' +
+          '<span class="ratio-value">' + formatHours(s.minutes) + 'h · ' + pct.toFixed(1) + '%</span>' +
+        '</div>';
+      }).join('');
+    })();
+
+    // 额度池表
+    const poolRowsHtml = allPools
+      .slice()
+      .sort((a, b) => (a.expiresAt - b.expiresAt) || (new Date(a.date) - new Date(b.date)))
+      .map(p =>
+        '<tr>' +
+        '<td>' + typeLabel(p.type) + '</td>' +
+        '<td>' + escapeHtml(p.date + ' 周' + weekdayCN(p.date)) + '</td>' +
+        '<td>' + formatDate(new Date(p.expiresAt)) + '</td>' +
+        '<td>' + (p.daysLeft >= 0 ? p.daysLeft + ' 天' : '已过期 ' + (-p.daysLeft) + ' 天') + '</td>' +
+        '<td class="num">' + formatHours(p.totalMinutes) + '</td>' +
+        '<td class="num">' + formatHours(p.consumedMinutes) + '</td>' +
+        '<td class="num">' + formatHours(p.availableMinutes) + '</td>' +
+        '<td><span class="status ' + p.status + '">' + statusLabel(p.status) + '</span></td>' +
+        '</tr>'
+      ).join('');
+
+    // 加班明细表（全部历史，含已过期）
+    const overtimeRowsHtml = loadOvertime()
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+      .map(ot => {
+        const p = getAllPools().find(x => x.id === ot.id);
+        return '<tr>' +
+          '<td>' + ot.date + '</td>' +
+          '<td>周' + weekdayCN(ot.date) + '</td>' +
+          '<td>' + ot.start + '</td>' +
+          '<td>' + ot.end + '</td>' +
+          '<td class="num">' + formatHours(ot.minutes) + '</td>' +
+          '<td>' + (p ? formatDate(new Date(p.expiresAt)) : '—') + '</td>' +
+          '<td class="num">' + (p ? formatHours(p.availableMinutes) : '0.0') + '</td>' +
+          '<td>' + (p ? '<span class="status ' + p.status + '">' + statusLabel(p.status) + '</span>' : '—') + '</td>' +
+          '</tr>';
+      }).join('');
+
+    const reportHtml =
+      '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<title>Vision Work 调休报告</title><style>' +
+      '*{box-sizing:border-box;margin:0;padding:0}' +
+      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;' +
+      'background:#f5f7fa;color:#1a2332;line-height:1.5;font-size:14px;padding:32px 20px;-webkit-font-smoothing:antialiased}' +
+      '.report{max-width:860px;margin:0 auto}' +
+      '.report-head{background:linear-gradient(135deg,#3b5bdb,#5f7ce0);color:#fff;border-radius:16px;' +
+      'padding:28px 32px;margin-bottom:24px}' +
+      '.report-head h1{font-size:24px;font-weight:700;letter-spacing:-0.02em}' +
+      '.report-head .meta{opacity:.85;font-size:13px;margin-top:6px}' +
+      '.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}' +
+      '.kpi{background:#fff;border:1px solid #e4e9f0;border-radius:12px;padding:16px 18px}' +
+      '.kpi-value{font-size:26px;font-weight:700;color:#1a2332;line-height:1.1}' +
+      '.kpi-value.accent-primary{color:#3b5bdb}.kpi-value.accent-success{color:#2f9e44}' +
+      '.kpi-value.accent-warning{color:#f59f00}.kpi-value.accent-danger{color:#e53935}' +
+      '.kpi-value.accent-muted{color:#868e96}' +
+      '.kpi-label{color:#6b7689;font-size:12px;margin-top:4px}' +
+      '.kpi-sub{color:#adb5bd;font-size:11px;margin-top:2px}' +
+      '.section{background:#fff;border:1px solid #e4e9f0;border-radius:12px;padding:20px 24px;margin-bottom:24px}' +
+      '.section h2{font-size:16px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e9eef4}' +
+      '.ratio-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}' +
+      '.ratio-label{width:64px;color:#6b7689;font-size:13px;flex-shrink:0}' +
+      '.ratio-track{flex:1;height:12px;background:#e9eef4;border-radius:6px;overflow:hidden}' +
+      '.ratio-fill{height:100%;border-radius:6px;transition:width .4s}' +
+      '.ratio-value{width:96px;text-align:right;color:#1a2332;font-size:12px;flex-shrink:0;font-weight:500}' +
+      '.ratio-empty{color:#6b7689;font-size:13px;padding:12px 0;text-align:center}' +
+      'table{width:100%;border-collapse:collapse;font-size:13px}' +
+      'th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #eef1f6}' +
+      'th{color:#6b7689;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;' +
+      'background:#f8f9fc}' +
+      'td.num{text-align:right;font-variant-numeric:tabular-nums}' +
+      '.status{display:inline-block;padding:1px 9px;border-radius:10px;font-size:11px;font-weight:500}' +
+      '.status.available{background:#e7f5ec;color:#2f9e44}.status.expiring{background:#fef4e0;color:#f59f00}' +
+      '.status.expired{background:#fdebeb;color:#e53935}.status.exhausted{background:#f1f3f5;color:#868e96}' +
+      '.status.invalid{background:#f1f3f5;color:#868e96}' +
+      '.print-hint{text-align:center;color:#adb5bd;font-size:12px;margin-top:16px}' +
+      '@media print{body{background:#fff;padding:0}.report-head{border-radius:0}' +
+      '.print-hint{display:none}.section{border:none;box-shadow:none}}' +
+      '@media(max-width:520px){.report-head{padding:20px}.kpi-value{font-size:22px}}' +
+      '</style></head><body><div class="report">' +
+      '<div class="report-head"><h1>Vision Work · 调休报告</h1>' +
+      '<div class="meta">生成日期：' + formatDate(today) + ' &nbsp;·&nbsp; 统计范围：全部历史记录</div></div>' +
+      '<div class="kpi-grid">' +
+      kpi('可用假期', formatHours(totalAvail) + '<span style="font-size:13px">h</span>', '调休 ' + formatHours(byType.overtime) + 'h · 年假 ' + formatHours(byType.annual) + 'h', 'accent-primary') +
+      kpi('累计加班', formatHours(totalOvertime) + '<span style="font-size:13px">h</span>', '全部工作日加班', 'accent-muted') +
+      kpi('累计调休', formatHours(totalComp) + '<span style="font-size:13px">h</span>', '已核销的调休', 'accent-success') +
+      kpi('年假额度', formatHours(totalAnnual) + '<span style="font-size:13px">h</span>', typeLabel('annual'), 'accent-warning') +
+      kpi('即将过期', expiringCount + '<span style="font-size:13px">笔</span>', '14 天内到期', expiringCount > 0 ? 'accent-warning' : 'accent-muted') +
+      kpi('已过期', expiredCount + '<span style="font-size:13px">笔</span>', '已作废额度', expiredCount > 0 ? 'accent-danger' : 'accent-muted') +
+      '</div>' +
+      '<div class="section"><h2>假期额度占比</h2>' + ratioBars + '</div>' +
+      '<div class="section"><h2>额度池</h2>' +
+      (allPools.length === 0 ? '<div class="ratio-empty">暂无数据</div>' :
+      '<table><thead><tr><th>类型</th><th>日期</th><th>过期日</th><th>剩余天数</th><th class="num">产生</th>' +
+      '<th class="num">已消耗</th><th class="num">剩余</th><th>状态</th></tr></thead><tbody>' + poolRowsHtml + '</tbody></table>') +
+      '</div>' +
+      '<div class="section"><h2>加班记录明细</h2>' +
+      (loadOvertime().length === 0 ? '<div class="ratio-empty">暂无数据</div>' :
+      '<table><thead><tr><th>日期</th><th>星期</th><th>开始</th><th>结束</th><th class="num">加班</th>' +
+      '<th>过期日</th><th class="num">剩余</th><th>状态</th></tr></thead><tbody>' + overtimeRowsHtml + '</tbody></table>') +
+      '</div>' +
+      '<div class="print-hint">Vision Work · 如需 PDF，请在浏览器中选择「打印 → 另存为 PDF」</div>' +
+      '</div></body></html>';
+
+    const blob = new Blob(['﻿' + reportHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '调休报告_' + todayStr() + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // ---------- Modal: 加班 ----------
   function openOvertimeModal(id) {
     const title = document.getElementById('overtime-modal-title');
@@ -1499,6 +1662,7 @@
     document.getElementById('btn-add-compensatory').addEventListener('click', () => openCompensatoryModal());
     document.getElementById('btn-export-overtime').addEventListener('click', exportOvertimeXls);
     document.getElementById('btn-export-pool').addEventListener('click', exportPoolXls);
+    document.getElementById('btn-export-report').addEventListener('click', exportReport);
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
     document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
