@@ -1302,6 +1302,12 @@ try {
   </div>
 </div>
 
+<div class="theme-menu hidden" id="theme-menu" role="menu">
+  <button class="theme-option" data-theme-opt="tech" role="menuitem"><span class="theme-swatch sw-tech"></span><span class="theme-name">科技炫酷</span><span class="theme-check">✓</span></button>
+  <button class="theme-option" data-theme-opt="art" role="menuitem"><span class="theme-swatch sw-art"></span><span class="theme-name">文艺</span><span class="theme-check">✓</span></button>
+  <button class="theme-option" data-theme-opt="minimal" role="menuitem"><span class="theme-swatch sw-minimal"></span><span class="theme-name">简约</span><span class="theme-check">✓</span></button>
+  <button class="theme-option" data-theme-opt="vivid" role="menuitem"><span class="theme-swatch sw-vivid"></span><span class="theme-name">活力</span><span class="theme-check">✓</span></button>
+</div>
 <script>
 (function() {
   'use strict';
@@ -2846,7 +2852,7 @@ try {
   bindEvents();
   bindAuthEvents();
   bindThemeEvents();
-  updateThemeButtons();
+  updateThemeUI();
   (async function init() {
     await ensureDefaultUserAndMigrate();
     const _initNow = new Date();
@@ -2862,11 +2868,5 @@ try {
   })();
 })();
 </script>
-<div class="theme-menu hidden" id="theme-menu" role="menu">
-  <button class="theme-option" data-theme-opt="tech" role="menuitem"><span class="theme-swatch sw-tech"></span><span class="theme-name">科技炫酷</span><span class="theme-check">✓</span></button>
-  <button class="theme-option" data-theme-opt="art" role="menuitem"><span class="theme-swatch sw-art"></span><span class="theme-name">文艺</span><span class="theme-check">✓</span></button>
-  <button class="theme-option" data-theme-opt="minimal" role="menuitem"><span class="theme-swatch sw-minimal"></span><span class="theme-name">简约</span><span class="theme-check">✓</span></button>
-  <button class="theme-option" data-theme-opt="vivid" role="menuitem"><span class="theme-swatch sw-vivid"></span><span class="theme-name">活力</span><span class="theme-check">✓</span></button>
-</div>
 </body>
 </html>
