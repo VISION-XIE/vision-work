@@ -805,6 +805,18 @@
     box-shadow: 0 0 0 3px var(--primary-light);
   }
   .auth-form .btn { width: 100%; padding: 11px; }
+  .auth-hint { color: var(--text-muted); font-size: 12px; margin-top: 12px; line-height: 1.6; }
+  .current-user {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px;
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 12.5px;
+    color: var(--accent-text);
+    font-weight: 500;
+    white-space: nowrap;
+  }
   .auth-theme-btn {
     position: absolute;
     top: 12px; right: 12px;
@@ -843,12 +855,15 @@ try { if (localStorage.getItem('vision-work:theme') === 'light') document.docume
     <button class="auth-theme-btn" id="btn-auth-theme-toggle" title="切换风格模式">🌙</button>
 
     <h2>Vision Work</h2>
-    <p class="auth-subtitle">加班调休记录 · 请输入访问口令</p>
+    <p class="auth-subtitle">加班调休记录 · 登录 / 注册</p>
     <div class="form-error hidden" id="auth-error"></div>
     <div class="auth-form">
-      <input type="password" id="auth-input" placeholder="口令" autocomplete="current-password" autofocus>
-      <button type="button" class="btn primary" id="auth-submit">进入</button>
+      <input type="text" id="auth-name" placeholder="用户名" autocomplete="name">
+      <input type="text" id="auth-account" placeholder="账号" autocomplete="username" autofocus>
+      <input type="password" id="auth-password" placeholder="密码" autocomplete="current-password">
+      <button type="button" class="btn primary" id="auth-submit">登录 / 注册</button>
     </div>
+    <p class="auth-hint">已有账号直接登录；新账号将自动注册，数据互相隔离</p>
   </div>
 </div>
 <div class="app">
@@ -858,7 +873,9 @@ try { if (localStorage.getItem('vision-work:theme') === 'light') document.docume
       <p class="subtitle">加班调休记录</p>
     </div>
     <div class="app-header-actions">
+      <span class="current-user" id="current-user"></span>
       <button class="btn theme-toggle" id="btn-theme-toggle" title="切换风格模式">🌙 深色</button>
+      <button class="btn" id="btn-logout">退出登录</button>
       
       <button class="btn" id="btn-export-data">导出数据</button>
       <button class="btn" id="btn-import-data">导入数据</button>
@@ -1097,26 +1114,50 @@ try { if (localStorage.getItem('vision-work:theme') === 'light') document.docume
   }
   function getExpireDate(otDate) { return addMonths(parseDateStr(otDate), 2); }
 
-  // ---------- 数据层 ----------
+  // ---------- 数据层（按账号隔离） ----------
+  const LS_KEY_USERS = 'vision-work:users';
+  const LS_KEY_SESSION = 'vision-work:session';
+  // 旧版本（口令版）使用的全局数据键，仅用于一次性迁移
   const LS_KEY_OT = 'vision-work:overtime';
   const LS_KEY_CP = 'vision-work:compensatory';
   const LS_KEY_LQ = 'vision-work:leave-quota';
+  const LEGACY_KEYS = { overtime: LS_KEY_OT, compensatory: LS_KEY_CP, leaveQuota: LS_KEY_LQ };
 
-  function loadOvertime() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY_OT) || '[]'); }
+  function loadUsers() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY_USERS) || '[]'); }
     catch(e) { return []; }
   }
-  function saveOvertime(list) { localStorage.setItem(LS_KEY_OT, JSON.stringify(list)); }
-  function loadCompensatory() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY_CP) || '[]'); }
+  function saveUsers(users) { localStorage.setItem(LS_KEY_USERS, JSON.stringify(users)); }
+  function findUser(account) { return loadUsers().find(u => u.account === account); }
+  function getCurrentAccount() {
+    try { return localStorage.getItem(LS_KEY_SESSION) || ''; }
+    catch(e) { return ''; }
+  }
+  function setCurrentAccount(account) {
+    try { localStorage.setItem(LS_KEY_SESSION, account); } catch(e) {}
+  }
+  function clearSession() {
+    try { localStorage.removeItem(LS_KEY_SESSION); } catch(e) {}
+  }
+  function dataKey(account, kind) { return 'vision-work:d:' + account + ':' + kind; }
+
+  function loadData(kind) {
+    const account = getCurrentAccount();
+    if (!account) return [];
+    try { return JSON.parse(localStorage.getItem(dataKey(account, kind)) || '[]'); }
     catch(e) { return []; }
   }
-  function saveCompensatory(list) { localStorage.setItem(LS_KEY_CP, JSON.stringify(list)); }
-  function loadLeaveQuota() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY_LQ) || '[]'); }
-    catch(e) { return []; }
+  function saveData(kind, list) {
+    const account = getCurrentAccount();
+    if (!account) return;
+    localStorage.setItem(dataKey(account, kind), JSON.stringify(list));
   }
-  function saveLeaveQuota(list) { localStorage.setItem(LS_KEY_LQ, JSON.stringify(list)); }
+  function loadOvertime() { return loadData('overtime'); }
+  function saveOvertime(list) { saveData('overtime', list); }
+  function loadCompensatory() { return loadData('compensatory'); }
+  function saveCompensatory(list) { saveData('compensatory', list); }
+  function loadLeaveQuota() { return loadData('leaveQuota'); }
+  function saveLeaveQuota(list) { saveData('leaveQuota', list); }
 
   // ---------- 数据迁移 ----------
   function migrateOvertime() {
@@ -2309,43 +2350,111 @@ try { if (localStorage.getItem('vision-work:theme') === 'light') document.docume
     document.querySelectorAll('.tab-content').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
   }
 
-  // ---------- 口令保护 ----------
-  const PASSWORD_HASH = 'a2d194c09903827411a91bf62e2c3cc7a23e8f9665da868c155d57637621d558';
-  const AUTH_KEY = 'vision-work:auth';
+  // ---------- 账号系统（登录 / 注册，数据按账号隔离） ----------
+  const DEFAULT_ACCOUNT = 'xiechangyun';
+  const DEFAULT_NAME = '谢昌运';
+  const DEFAULT_PASSWORD = '123456';
+
   async function sha256Hex(text) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
-  function isAuthed() {
-    try { return sessionStorage.getItem(AUTH_KEY) === '1'; }
-    catch(e) { return false; }
+  function genSalt() {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
   }
-  async function tryAuth(password) {
-    const hash = await sha256Hex(password);
-    if (hash === PASSWORD_HASH) {
-      try { sessionStorage.setItem(AUTH_KEY, '1'); } catch(e) {}
-      return true;
+  async function hashPassword(password, salt) {
+    return await sha256Hex(salt + '::' + password);
+  }
+  async function verifyPassword(password, user) {
+    return (await hashPassword(password, user.salt)) === user.hash;
+  }
+
+  // 确保预置账号存在，并把旧版本（口令版）的全局数据迁移到该账号
+  async function ensureDefaultUserAndMigrate() {
+    const users = loadUsers();
+    const hasLegacy = Object.keys(LEGACY_KEYS).some(k => {
+      try {
+        const v = localStorage.getItem(LEGACY_KEYS[k]);
+        return v && v !== '[]';
+      } catch(e) { return false; }
+    });
+    if (!users.some(u => u.account === DEFAULT_ACCOUNT)) {
+      const salt = genSalt();
+      const hash = await hashPassword(DEFAULT_PASSWORD, salt);
+      users.push({ name: DEFAULT_NAME, account: DEFAULT_ACCOUNT, salt, hash, createdAt: new Date().toISOString(), isDefault: true });
+      saveUsers(users);
     }
-    return false;
+    if (hasLegacy) {
+      for (const k of Object.keys(LEGACY_KEYS)) {
+        try {
+          const raw = localStorage.getItem(LEGACY_KEYS[k]);
+          if (raw) localStorage.setItem(dataKey(DEFAULT_ACCOUNT, k), raw);
+          localStorage.removeItem(LEGACY_KEYS[k]);
+        } catch(e) {}
+      }
+    }
+  }
+  function currentUserName() {
+    const u = findUser(getCurrentAccount());
+    return u ? u.name : '';
   }
   function showAuthError(msg) {
     const el = document.getElementById('auth-error');
     el.textContent = msg;
     el.classList.remove('hidden');
   }
+  function showAuthOverlay() {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    const input = document.getElementById('auth-account');
+    if (input) input.focus();
+  }
   function hideAuthOverlay() {
     document.getElementById('auth-overlay').classList.add('hidden');
+    const u = document.getElementById('current-user');
+    if (u) u.textContent = '👤 ' + currentUserName();
     renderAll();
   }
+  async function handleAuthSubmit() {
+    const nameEl = document.getElementById('auth-name');
+    const accountEl = document.getElementById('auth-account');
+    const passEl = document.getElementById('auth-password');
+    const name = nameEl.value.trim();
+    const account = accountEl.value.trim();
+    const password = passEl.value;
+    const errorEl = document.getElementById('auth-error');
+    errorEl.classList.add('hidden');
+    if (!account) { showAuthError('请输入账号'); accountEl.focus(); return; }
+    if (!password) { showAuthError('请输入密码'); passEl.focus(); return; }
+    const users = loadUsers();
+    const existing = users.find(u => u.account === account);
+    if (existing) {
+      const ok = await verifyPassword(password, existing);
+      if (!ok) { showAuthError('密码错误，请重试'); passEl.value = ''; passEl.focus(); return; }
+    } else {
+      if (!name) { showAuthError('新账号请填写用户名'); nameEl.focus(); return; }
+      const salt = genSalt();
+      const hash = await hashPassword(password, salt);
+      users.push({ name, account, salt, hash, createdAt: new Date().toISOString() });
+      saveUsers(users);
+    }
+    setCurrentAccount(account);
+    nameEl.value = ''; accountEl.value = ''; passEl.value = '';
+    hideAuthOverlay();
+  }
   function bindAuthEvents() {
-    const input = document.getElementById('auth-input');
     const submit = document.getElementById('auth-submit');
-    submit.addEventListener('click', async () => {
-      const ok = await tryAuth(input.value);
-      if (ok) hideAuthOverlay();
-      else { showAuthError('口令错误，请重试'); input.value = ''; input.focus(); }
+    ['auth-name', 'auth-account', 'auth-password'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); submit.click(); }
+      });
     });
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') submit.click(); });
+    submit.addEventListener('click', handleAuthSubmit);
+  }
+  function logout() {
+    clearSession();
+    location.reload();
   }
 
   // ---------- 事件绑定 ----------
@@ -2361,6 +2470,7 @@ try { if (localStorage.getItem('vision-work:theme') === 'light') document.docume
     document.getElementById('btn-export-data').addEventListener('click', exportDataJson);
     document.getElementById('btn-import-data').addEventListener('click', () => document.getElementById('data-file-input').click());
     document.getElementById('data-file-input').addEventListener('change', importDataJson);
+    document.getElementById('btn-logout').addEventListener('click', logout);
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
     document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
@@ -2458,12 +2568,19 @@ try { if (localStorage.getItem('vision-work:theme') === 'light') document.docume
   bindAuthEvents();
   bindThemeEvents();
   updateThemeButtons();
-  migrateData();
-  const _initNow = new Date();
-  otCalYear = _initNow.getFullYear();
-  otCalMonth = _initNow.getMonth();
-  switchOvertimeView(getOvertimeViewPref());
-  if (isAuthed()) hideAuthOverlay();
+  (async function init() {
+    await ensureDefaultUserAndMigrate();
+    const _initNow = new Date();
+    otCalYear = _initNow.getFullYear();
+    otCalMonth = _initNow.getMonth();
+    switchOvertimeView(getOvertimeViewPref());
+    if (getCurrentAccount() && findUser(getCurrentAccount())) {
+      migrateData();
+      hideAuthOverlay();
+    } else {
+      showAuthOverlay();
+    }
+  })();
 })();
 </script>
 </body>
