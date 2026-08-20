@@ -383,6 +383,35 @@
   .expiry-countdown.urgent { color: var(--danger); }
   .empty-hint { color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px 0; }
 
+  /* ---------- 调休榜单 ---------- */
+  .ranking-card { margin-bottom: 24px; }
+  .ranking-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ranking-title { font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
+  .ranking-sub { color: var(--text-muted); font-size: 12px; }
+  .ranking-list { display: flex; flex-direction: column; gap: 11px; }
+  .ranking-row { display: flex; align-items: center; gap: 12px; }
+  .ranking-rank {
+    width: 32px; font-size: 16px; font-weight: 600;
+    text-align: center; flex-shrink: 0; color: var(--text-muted);
+  }
+  .ranking-row.top .ranking-rank { font-size: 22px; }
+  .ranking-name { width: 72px; font-weight: 500; flex-shrink: 0; font-size: 13.5px; }
+  .ranking-row.top .ranking-name { font-weight: 700; color: var(--accent-text); }
+  .ranking-bar {
+    flex: 1; height: 10px;
+    background: var(--chart-track);
+    border-radius: 6px; overflow: hidden;
+  }
+  .ranking-fill {
+    height: 100%; background: var(--grad-btn);
+    border-radius: 6px; transition: width 0.5s ease;
+  }
+  .ranking-row.top .ranking-fill { background: var(--grad-main); box-shadow: 0 0 10px var(--glow-soft); }
+  .ranking-value {
+    width: 64px; text-align: right; font-weight: 600;
+    font-variant-numeric: tabular-nums; font-size: 13.5px;
+  }
+
   /* ---------- Tabs (pill) ---------- */
   .tabs {
     display: inline-flex;
@@ -1131,6 +1160,14 @@ try {
     </div>
   </section>
 
+  <section class="card ranking-card" id="ranking-card">
+    <div class="ranking-head">
+      <h2 class="ranking-title">🏆 调休榜单</h2>
+      <span class="ranking-sub">剩余可用调休时长（含年假）</span>
+    </div>
+    <div class="ranking-list" id="ranking-list"></div>
+  </section>
+
   <nav class="tabs">
     <button class="tab active" data-tab="overtime">加班记录</button>
     <button class="tab" data-tab="leave-quota">年假额度</button>
@@ -1645,7 +1682,67 @@ try {
     return ({ available: '可用', expiring: '即将过期', expired: '已过期', exhausted: '已用完', invalid: '无效' })[s] || s;
   }
 
+  // ---------- 调休榜单 ----------
+  function readAccountData(account, kind) {
+    try { return JSON.parse(localStorage.getItem(dataKey(account, kind)) || '[]'); }
+    catch(e) { return []; }
+  }
+  function computeAccountAvailableMinutes(account) {
+    const ots = readAccountData(account, 'overtime');
+    const lqs = readAccountData(account, 'leaveQuota');
+    const cps = readAccountData(account, 'compensatory');
+    const consumedMap = {};
+    for (const cp of cps) {
+      if (!cp.consumed) continue;
+      for (const c of cp.consumed) {
+        const st = c.sourceType || 'overtime';
+        const sid = c.sourceId || c.overtimeId;
+        const k = st + ':' + sid;
+        consumedMap[k] = (consumedMap[k] || 0) + (c.minutes || 0);
+      }
+    }
+    let available = 0;
+    const today = startOfDay(new Date());
+    for (const ot of ots) {
+      const rem = Math.max(0, (ot.minutes || 0) - (consumedMap['overtime:' + ot.id] || 0));
+      const daysLeft = daysBetween(today, new Date(getExpireDate(ot.date)));
+      if (rem > 0 && daysLeft >= 0) available += rem;
+    }
+    for (const lq of lqs) {
+      const rem = Math.max(0, Math.round((lq.hours || 0) * 60) - (consumedMap[(lq.type || 'annual') + ':' + lq.id] || 0));
+      const daysLeft = daysBetween(today, new Date(parseDateStr(lq.expiresAt)));
+      if (rem > 0 && daysLeft >= 0) available += rem;
+    }
+    return available;
+  }
+  function buildRanking() {
+    return FIXED_USERS.map(fu => ({
+      account: fu.account,
+      name: fu.name,
+      minutes: computeAccountAvailableMinutes(fu.account)
+    })).sort((a, b) => b.minutes - a.minutes);
+  }
+  function renderRanking() {
+    const wrap = document.getElementById('ranking-list');
+    if (!wrap) return;
+    const list = buildRanking();
+    const maxMin = Math.max(1, ...list.map(x => x.minutes));
+    const medals = ['🥇', '🥈', '🥉'];
+    wrap.innerHTML = list.map((r, i) => {
+      const pct = Math.round(r.minutes / maxMin * 100);
+      const isTop = i === 0;
+      const rank = i < 3 ? medals[i] : (i + 1);
+      return '<div class="ranking-row' + (isTop ? ' top' : '') + '">' +
+        '<span class="ranking-rank">' + rank + '</span>' +
+        '<span class="ranking-name">' + escapeHtml(r.name) + '</span>' +
+        '<div class="ranking-bar"><div class="ranking-fill" style="width:' + pct + '%"></div></div>' +
+        '<span class="ranking-value">' + formatHours(r.minutes) + 'h</span>' +
+        '</div>';
+    }).join('');
+  }
+
   function renderAll() {
+    renderRanking();
     renderDashboard();
     renderOvertimeList();
     renderOvertimeCalendar();
