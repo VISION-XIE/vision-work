@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vision Work — 加班调休记录</title>
+<title>Holiday Calendar — 加班调休记录</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1074,8 +1074,8 @@ try {
   <div class="auth-shell">
     <div class="auth-brand">
       <div class="auth-brand-inner">
-        <div class="brand-mark">VW</div>
-        <h2>Vision Work</h2>
+        <div class="brand-mark">HC</div>
+        <h2>Holiday Calendar</h2>
         <p class="brand-tagline">加班调休记录 · 让每一份付出都有回响</p>
         <ul class="brand-points">
           <li>加班记录与调休额度，一目了然</li>
@@ -1086,23 +1086,22 @@ try {
     </div>
     <div class="auth-panel">
       <button class="auth-theme-btn" id="btn-auth-theme-toggle" title="切换风格">🎨</button>
-      <h2 class="auth-panel-title">登录 / 注册</h2>
-      <p class="auth-subtitle">已有账号直接登录，新账号自动注册</p>
+      <h2 class="auth-panel-title">登录</h2>
+      <p class="auth-subtitle">请输入账号和密码登录</p>
       <div class="form-error hidden" id="auth-error"></div>
       <div class="auth-form">
-        <input type="text" id="auth-name" placeholder="用户名" autocomplete="name">
         <input type="text" id="auth-account" placeholder="账号" autocomplete="username" autofocus>
         <input type="password" id="auth-password" placeholder="密码" autocomplete="current-password">
-        <button type="button" class="btn primary" id="auth-submit">登录 / 注册</button>
+        <button type="button" class="btn primary" id="auth-submit">登录</button>
       </div>
-      <p class="auth-hint">账号密码持久保留在本机，数据按账号隔离</p>
+      <p class="auth-hint">内置账号登录 · 数据按账号隔离</p>
     </div>
   </div>
 </div>
 <div class="app">
   <header class="app-header">
     <div class="app-header-title">
-      <h1>Vision Work</h1>
+      <h1>Holiday Calendar</h1>
       <p class="subtitle">加班调休记录</p>
     </div>
     <div class="app-header-actions">
@@ -2150,7 +2149,7 @@ try {
     const reportHtml =
       '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">' +
       '<meta name="viewport" content="width=device-width, initial-scale=1">' +
-      '<title>Vision Work 调休报告</title><style>' +
+      '<title>Holiday Calendar 调休报告</title><style>' +
       '*{box-sizing:border-box;margin:0;padding:0}' +
       'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;' +
       'background:#f5f7fa;color:#1a2332;line-height:1.5;font-size:14px;padding:32px 20px;-webkit-font-smoothing:antialiased}' +
@@ -2189,7 +2188,7 @@ try {
       '.print-hint{display:none}.section{border:none;box-shadow:none}}' +
       '@media(max-width:520px){.report-head{padding:20px}.kpi-value{font-size:22px}}' +
       '</style></head><body><div class="report">' +
-      '<div class="report-head"><h1>Vision Work · 调休报告</h1>' +
+      '<div class="report-head"><h1>Holiday Calendar · 调休报告</h1>' +
       '<div class="meta">生成日期：' + formatDate(today) + ' &nbsp;·&nbsp; 统计范围：全部历史记录</div></div>' +
       '<div class="kpi-grid">' +
       kpi('可用假期', formatHours(totalAvail) + '<span style="font-size:13px">h</span>', '调休 ' + formatHours(byType.overtime) + 'h · 年假 ' + formatHours(byType.annual) + 'h', 'accent-primary') +
@@ -2210,7 +2209,7 @@ try {
       '<table><thead><tr><th>日期</th><th>星期</th><th>开始</th><th>结束</th><th class="num">加班</th>' +
       '<th>过期日</th><th class="num">剩余</th><th>状态</th></tr></thead><tbody>' + overtimeRowsHtml + '</tbody></table>') +
       '</div>' +
-      '<div class="print-hint">Vision Work · 如需 PDF，请在浏览器中选择「打印 → 另存为 PDF」</div>' +
+      '<div class="print-hint">Holiday Calendar · 如需 PDF，请在浏览器中选择「打印 → 另存为 PDF」</div>' +
       '</div></body></html>';
 
     const blob = new Blob(['﻿' + reportHtml], { type: 'text/html;charset=utf-8' });
@@ -2237,7 +2236,7 @@ try {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'vision-work-data_' + todayStr() + '.json';
+    a.download = 'holiday-calendar-data_' + todayStr() + '.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2591,10 +2590,15 @@ try {
     document.querySelectorAll('.tab-content').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
   }
 
-  // ---------- 账号系统（登录 / 注册，数据按账号隔离） ----------
-  const DEFAULT_ACCOUNT = 'xiechangyun';
-  const DEFAULT_NAME = '谢昌运';
-  const DEFAULT_PASSWORD = '123456';
+  // ---------- 账号系统（内置固定账号登录，数据按账号隔离） ----------
+  const FIXED_USERS = [
+    { name: '谢老师', account: 'xiechangyun' },
+    { name: '王老师', account: 'wangjiahui' },
+    { name: '马老师', account: 'mahui' },
+    { name: '郭老师', account: 'guoruilin' }
+  ];
+  const FIXED_PASSWORD = '123456';
+  const LEGACY_OWNER = 'xiechangyun';
 
   async function sha256Hex(text) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
@@ -2612,8 +2616,8 @@ try {
     return (await hashPassword(password, user.salt)) === user.hash;
   }
 
-  // 确保预置账号存在，并把旧版本（口令版）的全局数据迁移到该账号
-  async function ensureDefaultUserAndMigrate() {
+  // 确保内置账号存在（名称以固定列表为准），并把旧版本（口令版）全局数据迁移到谢老师账号
+  async function ensureFixedUsersAndMigrate() {
     const users = loadUsers();
     const hasLegacy = Object.keys(LEGACY_KEYS).some(k => {
       try {
@@ -2621,17 +2625,24 @@ try {
         return v && v !== '[]';
       } catch(e) { return false; }
     });
-    if (!users.some(u => u.account === DEFAULT_ACCOUNT)) {
-      const salt = genSalt();
-      const hash = await hashPassword(DEFAULT_PASSWORD, salt);
-      users.push({ name: DEFAULT_NAME, account: DEFAULT_ACCOUNT, salt, hash, createdAt: new Date().toISOString(), isDefault: true });
-      saveUsers(users);
+    let dirty = false;
+    for (const fu of FIXED_USERS) {
+      const existing = users.find(u => u.account === fu.account);
+      if (existing) {
+        if (existing.name !== fu.name) { existing.name = fu.name; dirty = true; }
+      } else {
+        const salt = genSalt();
+        const hash = await hashPassword(FIXED_PASSWORD, salt);
+        users.push({ name: fu.name, account: fu.account, salt, hash, createdAt: new Date().toISOString(), isFixed: true });
+        dirty = true;
+      }
     }
+    if (dirty) saveUsers(users);
     if (hasLegacy) {
       for (const k of Object.keys(LEGACY_KEYS)) {
         try {
           const raw = localStorage.getItem(LEGACY_KEYS[k]);
-          if (raw) localStorage.setItem(dataKey(DEFAULT_ACCOUNT, k), raw);
+          if (raw) localStorage.setItem(dataKey(LEGACY_OWNER, k), raw);
           localStorage.removeItem(LEGACY_KEYS[k]);
         } catch(e) {}
       }
@@ -2658,35 +2669,25 @@ try {
     renderAll();
   }
   async function handleAuthSubmit() {
-    const nameEl = document.getElementById('auth-name');
     const accountEl = document.getElementById('auth-account');
     const passEl = document.getElementById('auth-password');
-    const name = nameEl.value.trim();
     const account = accountEl.value.trim();
     const password = passEl.value;
     const errorEl = document.getElementById('auth-error');
     errorEl.classList.add('hidden');
     if (!account) { showAuthError('请输入账号'); accountEl.focus(); return; }
     if (!password) { showAuthError('请输入密码'); passEl.focus(); return; }
-    const users = loadUsers();
-    const existing = users.find(u => u.account === account);
-    if (existing) {
-      const ok = await verifyPassword(password, existing);
-      if (!ok) { showAuthError('密码错误，请重试'); passEl.value = ''; passEl.focus(); return; }
-    } else {
-      if (!name) { showAuthError('新账号请填写用户名'); nameEl.focus(); return; }
-      const salt = genSalt();
-      const hash = await hashPassword(password, salt);
-      users.push({ name, account, salt, hash, createdAt: new Date().toISOString() });
-      saveUsers(users);
-    }
+    const user = findUser(account);
+    if (!user) { showAuthError('账号不存在，请检查后重试'); accountEl.value = ''; passEl.value = ''; accountEl.focus(); return; }
+    const ok = await verifyPassword(password, user);
+    if (!ok) { showAuthError('密码错误，请重试'); passEl.value = ''; passEl.focus(); return; }
     setCurrentAccount(account);
-    nameEl.value = ''; accountEl.value = ''; passEl.value = '';
+    accountEl.value = ''; passEl.value = '';
     hideAuthOverlay();
   }
   function bindAuthEvents() {
     const submit = document.getElementById('auth-submit');
-    ['auth-name', 'auth-account', 'auth-password'].forEach(id => {
+    ['auth-account', 'auth-password'].forEach(id => {
       document.getElementById(id).addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); submit.click(); }
       });
@@ -2854,7 +2855,7 @@ try {
   bindThemeEvents();
   updateThemeUI();
   (async function init() {
-    await ensureDefaultUserAndMigrate();
+    await ensureFixedUsersAndMigrate();
     const _initNow = new Date();
     otCalYear = _initNow.getFullYear();
     otCalMonth = _initNow.getMonth();
