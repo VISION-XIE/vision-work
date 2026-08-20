@@ -1077,6 +1077,19 @@
     font-weight: 500;
     white-space: nowrap;
   }
+  .sync-status {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .sync-status.ok { color: var(--success); border-color: var(--success-border); }
+  .sync-status.syncing { color: var(--warning); border-color: var(--warning-border); }
+  .sync-status.err { color: var(--danger); border-color: var(--danger-border); }
 
   /* ---------- Auth（登录页，左右分栏） ---------- */
   .auth-overlay {
@@ -1270,6 +1283,7 @@ try {
     </div>
     <div class="app-header-actions">
       <span class="current-user" id="current-user"></span>
+      <span class="sync-status hidden" id="sync-status"></span>
       <div class="theme-picker">
         <button class="btn theme-toggle" id="btn-theme-toggle" title="切换风格">🎨 <span>风格</span></button>
       </div>
@@ -1570,6 +1584,7 @@ try {
     const account = getCurrentAccount();
     if (!account) return;
     localStorage.setItem(dataKey(account, kind), JSON.stringify(list));
+    scheduleSync();
   }
   function loadOvertime() { return loadData('overtime'); }
   function saveOvertime(list) { saveData('overtime', list); }
@@ -1577,6 +1592,107 @@ try {
   function saveCompensatory(list) { saveData('compensatory', list); }
   function loadLeaveQuota() { return loadData('leaveQuota'); }
   function saveLeaveQuota(list) { saveData('leaveQuota', list); }
+
+  // ---------- 云同步（LeanCloud） ----------
+  // 配置：在 https://console.leancloud.cn 创建应用后，从「设置 → 应用凭证」填入下面三项
+  const LC_CONFIG = {
+    appId: '',      // AppID
+    appKey: '',     // AppKey
+    serverURL: '',  // ServerURL（形如 https://xxx.api.lncldglobal.com）
+    className: 'SyncData'
+  };
+  function lcConfigured() {
+    return !!(LC_CONFIG.appId && LC_CONFIG.appKey && LC_CONFIG.serverURL);
+  }
+  function lcHeaders() {
+    return {
+      'X-LC-Id': LC_CONFIG.appId,
+      'X-LC-Key': LC_CONFIG.appKey,
+      'Content-Type': 'application/json'
+    };
+  }
+  async function lcFetchData(account) {
+    const where = encodeURIComponent(JSON.stringify({ account: account }));
+    const res = await fetch(LC_CONFIG.serverURL + '/1.1/classes/' + LC_CONFIG.className + '?where=' + where + '&limit=1', { headers: lcHeaders() });
+    if (!res.ok) throw new Error('云同步 HTTP ' + res.status);
+    const json = await res.json();
+    if (json.results && json.results.length > 0) {
+      const obj = json.results[0];
+      let payload = null;
+      try { payload = JSON.parse(obj.payload || 'null'); } catch (e) { payload = null; }
+      return { objectId: obj.objectId, payload: payload };
+    }
+    return null;
+  }
+  async function lcPushData(account) {
+    const payload = {
+      overtime: loadData('overtime'),
+      compensatory: loadData('compensatory'),
+      leaveQuota: loadData('leaveQuota')
+    };
+    const body = JSON.stringify({ account: account, payload: JSON.stringify(payload), ts: Date.now() });
+    const existing = await lcFetchData(account);
+    let res;
+    if (existing) {
+      res = await fetch(LC_CONFIG.serverURL + '/1.1/classes/' + LC_CONFIG.className + '/' + existing.objectId, {
+        method: 'PUT', headers: lcHeaders(), body: body
+      });
+    } else {
+      res = await fetch(LC_CONFIG.serverURL + '/1.1/classes/' + LC_CONFIG.className, {
+        method: 'POST', headers: lcHeaders(), body: body
+      });
+    }
+    if (!res.ok) throw new Error('云同步 HTTP ' + res.status);
+    return true;
+  }
+  function applyCloudData(account, payload) {
+    if (!payload) return;
+    localStorage.setItem(dataKey(account, 'overtime'), JSON.stringify(payload.overtime || []));
+    localStorage.setItem(dataKey(account, 'compensatory'), JSON.stringify(payload.compensatory || []));
+    localStorage.setItem(dataKey(account, 'leaveQuota'), JSON.stringify(payload.leaveQuota || []));
+  }
+  let _syncTimer = null;
+  function scheduleSync() {
+    if (!lcConfigured()) return;
+    const account = getCurrentAccount();
+    if (!account) return;
+    clearTimeout(_syncTimer);
+    _syncTimer = setTimeout(async () => {
+      try {
+        await lcPushData(account);
+        showSyncState('☁️ 已同步', 'ok');
+      } catch (e) {
+        showSyncState('☁️ 同步失败', 'err');
+      }
+    }, 1000);
+  }
+  function showSyncState(text, cls) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    if (!lcConfigured()) { el.classList.add('hidden'); el.textContent = ''; return; }
+    el.classList.remove('hidden');
+    el.textContent = text || '☁️';
+    el.className = 'sync-status' + (cls ? ' ' + cls : '');
+  }
+  async function syncAfterLogin(account) {
+    if (!lcConfigured() || !account) return;
+    showSyncState('☁️ 同步中…', 'syncing');
+    try {
+      const cloud = await lcFetchData(account);
+      if (cloud && cloud.payload) {
+        applyCloudData(account, cloud.payload);
+        migrateData();
+        renderAll();
+        showSyncState('☁️ 已同步', 'ok');
+      } else {
+        await lcPushData(account);
+        renderAll();
+        showSyncState('☁️ 已同步', 'ok');
+      }
+    } catch (e) {
+      showSyncState('☁️ 同步失败', 'err');
+    }
+  }
 
   // ---------- 数据迁移 ----------
   function migrateOvertime() {
@@ -2972,6 +3088,7 @@ try {
     const u = document.getElementById('current-user');
     if (u) u.textContent = '👤 ' + currentUserName();
     renderAll();
+    syncAfterLogin(getCurrentAccount());
   }
   async function handleAuthSubmit() {
     const accountEl = document.getElementById('auth-account');
