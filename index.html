@@ -1094,8 +1094,8 @@
 try {
   var __t = localStorage.getItem('vision-work:theme');
   var __ok = ['tech', 'art', 'minimal', 'vivid'].indexOf(__t) >= 0;
-  document.documentElement.setAttribute('data-theme', __ok ? __t : 'tech');
-} catch (e) { document.documentElement.setAttribute('data-theme', 'tech'); }
+  document.documentElement.setAttribute('data-theme', __ok ? __t : 'minimal');
+} catch (e) { document.documentElement.setAttribute('data-theme', 'minimal'); }
 </script>
 </head>
 <body>
@@ -2885,16 +2885,16 @@ try {
   function getThemePref() {
     try {
       const t = localStorage.getItem(LS_KEY_THEME);
-      return THEMES.some(x => x.id === t) ? t : 'tech';
-    } catch (e) { return 'tech'; }
+      return THEMES.some(x => x.id === t) ? t : 'minimal';
+    } catch (e) { return 'minimal'; }
   }
   function currentThemeLabel() {
     const id = getThemePref();
     const found = THEMES.find(x => x.id === id);
-    return found ? found.label : '科技炫酷';
+    return found ? found.label : '简约';
   }
   function applyTheme(id) {
-    if (!THEMES.some(x => x.id === id)) id = 'tech';
+    if (!THEMES.some(x => x.id === id)) id = 'minimal';
     document.documentElement.setAttribute('data-theme', id);
     try { localStorage.setItem(LS_KEY_THEME, id); } catch (e) {}
     updateThemeUI();
