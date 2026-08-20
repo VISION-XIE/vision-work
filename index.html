@@ -354,6 +354,12 @@
   .balance-meta .tag-annual { color: var(--success); }
   .balance-meta .tag-other { color: var(--neutral); }
   .balance-meta .tag-expiring { color: var(--warning); font-weight: 600; }
+  .balance-days {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .balance-days strong { color: var(--accent-text); font-weight: 650; }
 
   .expiry-card .card-title {
     font-size: 12.5px; font-weight: 600; color: var(--text-muted);
@@ -1210,6 +1216,7 @@ try {
     <div class="card balance-card">
       <div class="balance-label">当前可用假期</div>
       <div class="balance-value" id="balance-value">0.0 <span>小时</span></div>
+      <div class="balance-days" id="balance-days">≈ 0.0 天</div>
       <div class="balance-meta" id="balance-meta">暂无假期记录</div>
     </div>
     <div class="card expiry-card">
@@ -1818,6 +1825,8 @@ try {
   function renderDashboard() {
     const total = getAvailableTotal();
     document.getElementById('balance-value').innerHTML = formatHours(total) + ' <span>小时</span>';
+    const daysEl = document.getElementById('balance-days');
+    if (daysEl) daysEl.innerHTML = '≈ <strong>' + (total / 60 / 8).toFixed(1) + '</strong> 天（按 8 小时/天）';
 
     const byType = getAvailableByType();
     const pools = getAllPools();
