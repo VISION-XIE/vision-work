@@ -696,6 +696,61 @@
   .sw-minimal { background: linear-gradient(135deg, #f4f5f7, #2563eb); }
   .sw-vivid { background: linear-gradient(135deg, #f97316, #ec4899); }
 
+  /* ---------- 加班打卡悬浮按钮 ---------- */
+  .punch-btn {
+    position: fixed;
+    right: 26px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: var(--grad-btn);
+    color: #fff;
+    font-family: inherit;
+    box-shadow: 0 12px 32px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transition: transform 0.15s, filter 0.15s, box-shadow 0.2s;
+  }
+  .punch-btn:hover { transform: translateY(-50%) scale(1.07); filter: brightness(1.08); box-shadow: 0 16px 40px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+  .punch-btn:active { transform: translateY(-50%) scale(0.96); }
+  .punch-icon { font-size: 28px; line-height: 1; }
+  .punch-text { font-size: 13px; font-weight: 700; letter-spacing: 0.03em; }
+
+  /* ---------- Toast 提示 ---------- */
+  .toast {
+    position: fixed;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-24px);
+    z-index: 400;
+    padding: 13px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-pop);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    max-width: min(90vw, 500px);
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success-border); }
+  .toast.warn { border-color: var(--warning-border); }
+  .toast.error { border-color: var(--danger-border); }
+
   /* ---------- Table ---------- */
   .table-wrap {
     background: var(--card);
@@ -1087,6 +1142,9 @@
     .auth-shell { grid-template-columns: 1fr; max-width: 420px; }
     .auth-brand { display: none; }
     .auth-panel { padding: 36px 26px; }
+    .punch-btn { right: 14px; width: 78px; height: 78px; }
+    .punch-icon { font-size: 23px; }
+    .punch-text { font-size: 12px; }
   }
 
 </style>
@@ -1344,6 +1402,11 @@ try {
   <button class="theme-option" data-theme-opt="minimal" role="menuitem"><span class="theme-swatch sw-minimal"></span><span class="theme-name">简约</span><span class="theme-check">✓</span></button>
   <button class="theme-option" data-theme-opt="vivid" role="menuitem"><span class="theme-swatch sw-vivid"></span><span class="theme-name">活力</span><span class="theme-check">✓</span></button>
 </div>
+<button class="punch-btn hidden" id="btn-punch" type="button" title="加班打卡">
+  <span class="punch-icon">⏰</span>
+  <span class="punch-text">加班打卡</span>
+</button>
+<div class="toast" id="toast"></div>
 <script>
 (function() {
   'use strict';
@@ -2756,11 +2819,15 @@ try {
   }
   function showAuthOverlay() {
     document.getElementById('auth-overlay').classList.remove('hidden');
+    const pb = document.getElementById('btn-punch');
+    if (pb) pb.classList.add('hidden');
     const input = document.getElementById('auth-account');
     if (input) input.focus();
   }
   function hideAuthOverlay() {
     document.getElementById('auth-overlay').classList.add('hidden');
+    const pb = document.getElementById('btn-punch');
+    if (pb) pb.classList.remove('hidden');
     const u = document.getElementById('current-user');
     if (u) u.textContent = '👤 ' + currentUserName();
     renderAll();
@@ -2796,6 +2863,54 @@ try {
     location.reload();
   }
 
+  // ---------- 加班打卡 ----------
+  let toastTimer = null;
+  function showToast(msg, type) {
+    const el = document.getElementById('toast');
+    if (!el) { alert(msg); return; }
+    el.textContent = msg;
+    el.className = 'toast ' + (type || '');
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+  function punchClock() {
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const nowStr = nowTimeStr();
+    const today = todayStr();
+    if (nowMin < OT_START_MIN) {
+      showToast('现在还没到 18:30，暂不能加班打卡', 'warn');
+      return;
+    }
+    const rawMin = nowMin - OT_START_MIN;
+    if (rawMin < MIN_VALID_MINUTES) {
+      showToast('加班时长不足 30 分钟，暂不能打卡', 'warn');
+      return;
+    }
+    const list = loadOvertime();
+    const existing = list.find(o => o.date === today && o.punched);
+    if (existing) {
+      if (nowStr <= existing.end) {
+        showToast('当前时间未超过已记录的下班时间 ' + existing.end + '，无需更新', 'warn');
+        return;
+      }
+      existing.end = nowStr;
+      existing.minutes = computeOvertimeMinutes(existing.start, nowStr);
+      existing.punched = true;
+      saveOvertime(list);
+      showToast('打卡成功 · 今日加班更新至 ' + nowStr + '，共 ' + formatHours(existing.minutes) + ' 小时', 'success');
+    } else {
+      const minutes = computeOvertimeMinutes('18:30', nowStr);
+      const ot = { id: uid(), date: today, start: '18:30', end: nowStr, minutes, note: '加班打卡', punched: true, createdAt: new Date().toISOString() };
+      list.push(ot);
+      saveOvertime(list);
+      showToast('打卡成功 · 已记录今日加班 ' + formatHours(minutes) + ' 小时', 'success');
+    }
+    renderAll();
+  }
+
   // ---------- 事件绑定 ----------
   function bindEvents() {
     document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
@@ -2810,6 +2925,7 @@ try {
     document.getElementById('btn-import-data').addEventListener('click', () => document.getElementById('data-file-input').click());
     document.getElementById('data-file-input').addEventListener('change', importDataJson);
     document.getElementById('btn-logout').addEventListener('click', logout);
+    document.getElementById('btn-punch').addEventListener('click', punchClock);
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
     document.getElementById('overtime-submit').addEventListener('click', submitOvertime);
