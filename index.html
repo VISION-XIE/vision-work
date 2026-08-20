@@ -120,6 +120,166 @@
   }
   .tab-header h2 { font-size: 18px; font-weight: 600; }
   .tab-actions { display: flex; gap: 8px; align-items: center; }
+  .tab-title-group { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+  /* 视图切换分段控件 */
+  .ot-view-switch {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+  }
+  .ot-view-switch .switch-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 6px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ot-view-switch .switch-btn.active {
+    background: var(--card-bg);
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* 加班日历 */
+  .ot-calendar-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .ot-calendar-wrap.hidden { display: none; }
+  .table-wrap.hidden { display: none; }
+  .cal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .cal-title { font-size: 16px; font-weight: 600; min-width: 110px; text-align: center; }
+  .cal-nav {
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+  }
+  .cal-nav:hover { background: var(--bg); color: var(--text); }
+  .cal-today-btn { margin-left: auto; }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+  }
+  .cal-weekday {
+    padding: 8px 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .cal-cell {
+    min-height: 76px;
+    padding: 6px 4px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    background: var(--card-bg);
+    transition: background 0.12s;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell:hover { background: var(--primary-light); }
+  .cal-cell.other-month { background: var(--bg); cursor: default; }
+  .cal-cell.other-month:hover { background: var(--bg); }
+  .cal-day-num {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+    width: 24px; height: 24px;
+    line-height: 24px;
+    margin: 0 auto;
+    border-radius: 50%;
+  }
+  .cal-cell.weekend .cal-day-num { color: var(--warning); }
+  .cal-cell.other-month .cal-day-num { color: var(--neutral); opacity: 0.55; }
+  .cal-cell.today .cal-day-num { background: var(--primary); color: #fff; font-weight: 600; }
+  .cal-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin: 6px auto 0;
+  }
+  .cal-dot.lv1 { background: #ffb4b4; }
+  .cal-dot.lv2 { background: #ff8787; }
+  .cal-dot.lv3 { background: #fa5252; }
+  .cal-dot.lv4 { background: #e03131; }
+
+  /* 日历 tooltip */
+  .cal-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2b3245;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: nowrap;
+    z-index: 50;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    pointer-events: none;
+    text-align: left;
+  }
+  .cal-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #2b3245;
+  }
+  .cal-tip.tip-right { left: auto; right: -4px; transform: none; }
+  .cal-tip.tip-right::after { left: auto; right: 18px; transform: none; }
+  .cal-cell:hover .cal-tip { display: block; }
+  .cal-tip-title { font-weight: 600; margin-bottom: 2px; }
+  .cal-tip-row { color: #d7dbe4; }
+  .cal-tip-note { color: #aeb6c8; font-size: 11px; }
+  .cal-tip-total {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.16);
+    color: #ffd8d8;
+    font-weight: 600;
+  }
+
+  /* 日历图例 */
+  .cal-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .cal-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .cal-legend .cal-dot { margin: 0; width: 8px; height: 8px; }
+  .cal-legend-hint { margin-left: auto; }
 
   /* Buttons */
   .btn {
@@ -386,12 +546,19 @@
 
   <section class="tab-content active" id="tab-overtime">
     <div class="tab-header">
-      <h2>加班记录</h2>
+      <div class="tab-title-group">
+        <h2>加班记录</h2>
+        <div class="ot-view-switch" id="ot-view-switch">
+          <button type="button" class="switch-btn active" data-ot-view="calendar">日历</button>
+          <button type="button" class="switch-btn" data-ot-view="list">列表</button>
+        </div>
+      </div>
       <div class="tab-actions">
         <button class="btn" id="btn-export-overtime">导出 Excel</button>
         <button class="btn primary" id="btn-add-overtime">+ 新增加班</button>
       </div>
     </div>
+    <div class="ot-calendar-wrap" id="overtime-calendar-wrap"></div>
     <div class="table-wrap" id="overtime-table-wrap"></div>
   </section>
 
@@ -857,6 +1024,7 @@
   function renderAll() {
     renderDashboard();
     renderOvertimeList();
+    renderOvertimeCalendar();
     renderLeaveQuotaList();
     renderCompensatoryList();
     renderPoolOverview();
@@ -936,6 +1104,125 @@
       '</tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table>';
+  }
+
+  // ---------- 加班日历视图 ----------
+  const LS_KEY_OT_VIEW = 'vision-work:ot-view';
+  let otCalYear = 0, otCalMonth = 0;
+
+  function getOvertimeViewPref() {
+    try { return localStorage.getItem(LS_KEY_OT_VIEW) === 'list' ? 'list' : 'calendar'; }
+    catch(e) { return 'calendar'; }
+  }
+
+  function switchOvertimeView(view) {
+    const calWrap = document.getElementById('overtime-calendar-wrap');
+    const listWrap = document.getElementById('overtime-table-wrap');
+    if (view === 'list') {
+      calWrap.classList.add('hidden');
+      listWrap.classList.remove('hidden');
+    } else {
+      calWrap.classList.remove('hidden');
+      listWrap.classList.add('hidden');
+    }
+    document.querySelectorAll('#ot-view-switch .switch-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.otView === view);
+    });
+    try { localStorage.setItem(LS_KEY_OT_VIEW, view); } catch(e) {}
+  }
+
+  function groupOvertimeByDate() {
+    const map = {};
+    for (const ot of loadOvertime()) {
+      if (!map[ot.date]) map[ot.date] = [];
+      map[ot.date].push(ot);
+    }
+    return map;
+  }
+
+  function dotLevel(totalMinutes) {
+    if (totalMinutes <= 60) return 'lv1';
+    if (totalMinutes <= 120) return 'lv2';
+    if (totalMinutes <= 180) return 'lv3';
+    return 'lv4';
+  }
+
+  function changeOtMonth(delta) {
+    otCalMonth += delta;
+    if (otCalMonth < 0) { otCalMonth = 11; otCalYear--; }
+    if (otCalMonth > 11) { otCalMonth = 0; otCalYear++; }
+    renderOvertimeCalendar();
+  }
+
+  function renderOvertimeCalendar() {
+    const wrap = document.getElementById('overtime-calendar-wrap');
+    const byDate = groupOvertimeByDate();
+    const poolMap = Object.fromEntries(getAllPools().map(p => [p.id, p]));
+    const todayS = todayStr();
+
+    const first = new Date(otCalYear, otCalMonth, 1);
+    const startOffset = first.getDay();
+    const daysInMonth = new Date(otCalYear, otCalMonth + 1, 0).getDate();
+    const prevMonthDays = new Date(otCalYear, otCalMonth, 0).getDate();
+
+    const weekdayHtml = ['日','一','二','三','四','五','六'].map(w => '<div class="cal-weekday">' + w + '</div>').join('');
+
+    let cells = '';
+    for (let i = startOffset - 1; i >= 0; i--) {
+      cells += '<div class="cal-cell other-month"><div class="cal-day-num">' + (prevMonthDays - i) + '</div></div>';
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = otCalYear + '-' + pad2(otCalMonth + 1) + '-' + pad2(day);
+      const dow = new Date(otCalYear, otCalMonth, day).getDay();
+      const classes = ['cal-cell'];
+      if (dow === 0 || dow === 6) classes.push('weekend');
+      if (dateStr === todayS) classes.push('today');
+
+      const records = byDate[dateStr] || [];
+      const totalMin = records.reduce((s, r) => s + (r.minutes || 0), 0);
+
+      let inner = '<div class="cal-day-num">' + day + '</div>';
+      if (records.length > 0) {
+        classes.push('has-ot');
+        inner += '<div class="cal-dot ' + dotLevel(totalMin) + '"></div>';
+        const rowsHtml = records.map(r => {
+          const p = poolMap[r.id];
+          const statusTxt = p ? ' · ' + statusLabel(p.status) : '';
+          const noteTxt = r.note
+            ? '<div class="cal-tip-note">' + escapeHtml(r.note.length > 24 ? r.note.slice(0, 24) + '…' : r.note) + '</div>'
+            : '';
+          return '<div class="cal-tip-row">' + r.start + '–' + r.end + ' · ' + formatHours(r.minutes) + 'h' + statusTxt + '</div>' + noteTxt;
+        }).join('');
+        const totalHtml = records.length > 1
+          ? '<div class="cal-tip-total">共 ' + records.length + ' 笔 · 合计 ' + formatHours(totalMin) + 'h</div>'
+          : '';
+        const tipRight = dow >= 5 ? ' tip-right' : '';
+        inner += '<div class="cal-tip' + tipRight + '">' +
+          '<div class="cal-tip-title">' + dateStr + ' 周' + weekdayCN(dateStr) + '</div>' +
+          rowsHtml + totalHtml + '</div>';
+      }
+      cells += '<div class="' + classes.join(' ') + '" data-cal-date="' + dateStr + '" data-cal-count="' + records.length + '">' + inner + '</div>';
+    }
+    const trailing = (7 - ((startOffset + daysInMonth) % 7)) % 7;
+    for (let i = 1; i <= trailing; i++) {
+      cells += '<div class="cal-cell other-month"><div class="cal-day-num">' + i + '</div></div>';
+    }
+
+    wrap.innerHTML =
+      '<div class="cal-header">' +
+        '<button type="button" class="cal-nav" id="cal-prev" title="上个月">‹</button>' +
+        '<div class="cal-title">' + otCalYear + '年' + (otCalMonth + 1) + '月</div>' +
+        '<button type="button" class="cal-nav" id="cal-next" title="下个月">›</button>' +
+        '<button type="button" class="cal-nav cal-today-btn" id="cal-today">今天</button>' +
+      '</div>' +
+      '<div class="cal-grid">' + weekdayHtml + cells + '</div>' +
+      '<div class="cal-legend">' +
+        '<span class="cal-legend-item"><span class="cal-dot lv1"></span>≤1h</span>' +
+        '<span class="cal-legend-item"><span class="cal-dot lv2"></span>1–2h</span>' +
+        '<span class="cal-legend-item"><span class="cal-dot lv3"></span>2–3h</span>' +
+        '<span class="cal-legend-item"><span class="cal-dot lv4"></span>&gt;3h</span>' +
+        '<span class="cal-legend-hint">点击空白日期可快速新增加班</span>' +
+      '</div>';
   }
 
   function renderLeaveQuotaList() {
@@ -1374,7 +1661,7 @@
   }
 
   // ---------- Modal: 加班 ----------
-  function openOvertimeModal(id) {
+  function openOvertimeModal(id, presetDate) {
     const title = document.getElementById('overtime-modal-title');
     const errorEl = document.getElementById('overtime-form-error');
     errorEl.classList.add('hidden');
@@ -1391,7 +1678,7 @@
     } else {
       title.textContent = '新增加班';
       document.getElementById('overtime-id').value = '';
-      document.getElementById('overtime-date').value = todayStr();
+      document.getElementById('overtime-date').value = presetDate || todayStr();
       document.getElementById('overtime-start').value = '18:30';
       const now = nowTimeStr();
       document.getElementById('overtime-end').value = now < '18:30' ? '19:00' : now;
@@ -1754,6 +2041,30 @@
       if (t.dataset.editOt) openOvertimeModal(t.dataset.editOt);
       else if (t.dataset.delOt) confirmDeleteOvertime(t.dataset.delOt);
     });
+    document.querySelectorAll('#ot-view-switch .switch-btn').forEach(b => {
+      b.addEventListener('click', () => switchOvertimeView(b.dataset.otView));
+    });
+    document.getElementById('overtime-calendar-wrap').addEventListener('click', e => {
+      if (e.target.id === 'cal-prev') { changeOtMonth(-1); return; }
+      if (e.target.id === 'cal-next') { changeOtMonth(1); return; }
+      if (e.target.id === 'cal-today') {
+        const now = new Date();
+        otCalYear = now.getFullYear();
+        otCalMonth = now.getMonth();
+        renderOvertimeCalendar();
+        return;
+      }
+      const cell = e.target.closest('.cal-cell');
+      if (!cell || cell.classList.contains('other-month')) return;
+      const dateStr = cell.dataset.calDate;
+      const count = parseInt(cell.dataset.calCount, 10);
+      if (count === 0) {
+        openOvertimeModal(null, dateStr);
+      } else if (count === 1) {
+        const rec = groupOvertimeByDate()[dateStr][0];
+        openOvertimeModal(rec.id);
+      }
+    });
     document.getElementById('leave-quota-table-wrap').addEventListener('click', e => {
       const t = e.target;
       if (t.dataset.editLq) openLeaveQuotaModal(t.dataset.editLq);
@@ -1775,6 +2086,10 @@
   bindEvents();
   bindAuthEvents();
   migrateData();
+  const _initNow = new Date();
+  otCalYear = _initNow.getFullYear();
+  otCalMonth = _initNow.getMonth();
+  switchOvertimeView(getOvertimeViewPref());
   if (isAuthed()) hideAuthOverlay();
 })();
 </script>
