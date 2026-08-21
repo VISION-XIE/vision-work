@@ -3124,26 +3124,35 @@ try {
     if (!sbConfigured()) { showToast('云同步未配置', 'warn'); return; }
     showSyncState('☁️ 同步中…', 'syncing');
     try {
+      const localCounts = {
+        overtime: readAccountData(account, 'overtime').length,
+        compensatory: readAccountData(account, 'compensatory').length,
+        leaveQuota: readAccountData(account, 'leaveQuota').length
+      };
+      const localHasData = localCounts.overtime > 0 || localCounts.compensatory > 0 || localCounts.leaveQuota > 0;
       const cloud = await sbFetchData(account);
-      const cloudHasData = cloud && (
-        (cloud.overtime && cloud.overtime.length) ||
-        (cloud.compensatory && cloud.compensatory.length) ||
-        (cloud.leaveQuota && cloud.leaveQuota.length)
-      );
-      const localHasData = ['overtime', 'compensatory', 'leaveQuota'].some(k => readAccountData(account, k).length > 0);
+      const cloudCounts = cloud ? {
+        overtime: (cloud.overtime || []).length,
+        compensatory: (cloud.compensatory || []).length,
+        leaveQuota: (cloud.leaveQuota || []).length
+      } : null;
+      const cloudHasData = cloudCounts && (cloudCounts.overtime > 0 || cloudCounts.compensatory > 0 || cloudCounts.leaveQuota > 0);
+
       if (localHasData) {
         await sbPushData(account);
+        const verify = await sbFetchData(account);
+        const vc = verify ? { overtime: (verify.overtime || []).length, compensatory: (verify.compensatory || []).length, leaveQuota: (verify.leaveQuota || []).length } : null;
         showSyncState('☁️ 已同步', 'ok');
-        showToast('已上传到云端 ✓', 'success');
+        showToast('已上传✓ 本地[加班' + localCounts.overtime + ' 年假' + localCounts.leaveQuota + ' 调休' + localCounts.compensatory + '] → 云端[加班' + (vc ? vc.overtime : '?') + ' 年假' + (vc ? vc.leaveQuota : '?') + ' 调休' + (vc ? vc.compensatory : '?') + ']', 'success');
       } else if (cloudHasData) {
         applyCloudData(account, cloud);
         migrateData();
         renderAll();
         showSyncState('☁️ 已同步', 'ok');
-        showToast('已从云端同步 ✓', 'success');
+        showToast('已从云端同步✓ [加班' + cloudCounts.overtime + ' 年假' + cloudCounts.leaveQuota + ' 调休' + cloudCounts.compensatory + ']', 'success');
       } else {
         showSyncState('☁️ 已同步', 'ok');
-        showToast('暂无数据可同步', 'warn');
+        showToast('本地和云端都无数据 [本地加班' + localCounts.overtime + '笔]', 'warn');
       }
     } catch (e) {
       showSyncState('☁️ 同步失败', 'err');
