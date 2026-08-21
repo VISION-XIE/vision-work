@@ -302,6 +302,21 @@
   .app-header .subtitle { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
   .app-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
+  /* ---------- 云同步诊断条 ---------- */
+  .sync-detail {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius-sm);
+    background: var(--card-2);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    word-break: break-all;
+    user-select: text;
+    white-space: pre-wrap;
+  }
+
   /* ---------- Dashboard ---------- */
   .dashboard {
     display: grid;
@@ -1297,6 +1312,8 @@ try {
   </header>
 
   <input type="file" id="data-file-input" accept=".json,application/json" style="display:none">
+
+  <div class="sync-detail hidden" id="sync-detail"></div>
 
   <section class="dashboard">
     <div class="card balance-card">
@@ -3118,6 +3135,12 @@ try {
     location.reload();
   }
 
+  function showSyncDetail(text) {
+    const el = document.getElementById('sync-detail');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('hidden');
+  }
   async function manualSync() {
     const account = getCurrentAccount();
     if (!account) return;
@@ -3143,7 +3166,10 @@ try {
         const verify = await sbFetchData(account);
         const vc = verify ? { overtime: (verify.overtime || []).length, compensatory: (verify.compensatory || []).length, leaveQuota: (verify.leaveQuota || []).length } : null;
         showSyncState('☁️ 已同步', 'ok');
-        showToast('已上传✓ 本地[加班' + localCounts.overtime + ' 年假' + localCounts.leaveQuota + ' 调休' + localCounts.compensatory + '] → 云端[加班' + (vc ? vc.overtime : '?') + ' 年假' + (vc ? vc.leaveQuota : '?') + ' 调休' + (vc ? vc.compensatory : '?') + ']', 'success');
+        showToast('已上传到云端 ✓', 'success');
+        showSyncDetail('【同步诊断】请把这段文字发给开发者\n' +
+          '本地数据：加班 ' + localCounts.overtime + ' 笔，年假 ' + localCounts.leaveQuota + ' 笔，调休 ' + localCounts.compensatory + ' 笔\n' +
+          '云端数据（上传后）：加班 ' + (vc ? vc.overtime : '?') + ' 笔，年假 ' + (vc ? vc.leaveQuota : '?') + ' 笔，调休 ' + (vc ? vc.compensatory : '?') + ' 笔');
       } else if (cloudHasData) {
         applyCloudData(account, cloud);
         migrateData();
