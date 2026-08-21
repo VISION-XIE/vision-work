@@ -1279,11 +1279,12 @@ try {
   <header class="app-header">
     <div class="app-header-title">
       <h1>Holiday Calendar</h1>
-      <p class="subtitle">加班调休记录</p>
+      <p class="subtitle">加班调休记录 · v3.0</p>
     </div>
     <div class="app-header-actions">
       <span class="current-user" id="current-user"></span>
       <span class="sync-status hidden" id="sync-status"></span>
+      <button class="btn" id="btn-sync-now" title="手动同步到云端">☁️ 同步</button>
       <div class="theme-picker">
         <button class="btn theme-toggle" id="btn-theme-toggle" title="切换风格">🎨 <span>风格</span></button>
       </div>
@@ -3117,6 +3118,39 @@ try {
     location.reload();
   }
 
+  async function manualSync() {
+    const account = getCurrentAccount();
+    if (!account) return;
+    if (!sbConfigured()) { showToast('云同步未配置', 'warn'); return; }
+    showSyncState('☁️ 同步中…', 'syncing');
+    try {
+      const cloud = await sbFetchData(account);
+      const cloudHasData = cloud && (
+        (cloud.overtime && cloud.overtime.length) ||
+        (cloud.compensatory && cloud.compensatory.length) ||
+        (cloud.leaveQuota && cloud.leaveQuota.length)
+      );
+      const localHasData = ['overtime', 'compensatory', 'leaveQuota'].some(k => readAccountData(account, k).length > 0);
+      if (localHasData) {
+        await sbPushData(account);
+        showSyncState('☁️ 已同步', 'ok');
+        showToast('已上传到云端 ✓', 'success');
+      } else if (cloudHasData) {
+        applyCloudData(account, cloud);
+        migrateData();
+        renderAll();
+        showSyncState('☁️ 已同步', 'ok');
+        showToast('已从云端同步 ✓', 'success');
+      } else {
+        showSyncState('☁️ 已同步', 'ok');
+        showToast('暂无数据可同步', 'warn');
+      }
+    } catch (e) {
+      showSyncState('☁️ 同步失败', 'err');
+      showToast('同步失败：' + (e && e.message ? e.message : e), 'error');
+    }
+  }
+
   // ---------- 加班打卡 ----------
   let toastTimer = null;
   function showToast(msg, type) {
@@ -3180,6 +3214,7 @@ try {
     document.getElementById('data-file-input').addEventListener('change', importDataJson);
     document.getElementById('btn-logout').addEventListener('click', logout);
     document.getElementById('btn-punch').addEventListener('click', punchClock);
+    document.getElementById('btn-sync-now').addEventListener('click', manualSync);
     bindLeaveStatsEvents();
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
