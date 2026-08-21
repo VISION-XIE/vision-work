@@ -1667,14 +1667,22 @@ try {
     showSyncState('☁️ 同步中…', 'syncing');
     try {
       const cloud = await sbFetchData(account);
-      if (cloud && cloud.payload) {
-        applyCloudData(account, cloud.payload);
+      const cloudHasData = cloud && (
+        (cloud.overtime && cloud.overtime.length) ||
+        (cloud.compensatory && cloud.compensatory.length) ||
+        (cloud.leaveQuota && cloud.leaveQuota.length)
+      );
+      const localHasData = ['overtime', 'compensatory', 'leaveQuota'].some(k => readAccountData(account, k).length > 0);
+      if (cloudHasData) {
+        applyCloudData(account, cloud);
         migrateData();
         renderAll();
         showSyncState('☁️ 已同步', 'ok');
-      } else {
+      } else if (localHasData) {
         await sbPushData(account);
         renderAll();
+        showSyncState('☁️ 已同步', 'ok');
+      } else {
         showSyncState('☁️ 已同步', 'ok');
       }
     } catch (e) {
