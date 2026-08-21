@@ -302,21 +302,6 @@
   .app-header .subtitle { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
   .app-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-  /* ---------- 云同步诊断条 ---------- */
-  .sync-detail {
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    border: 1px solid var(--primary-border);
-    border-radius: var(--radius-sm);
-    background: var(--card-2);
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--text);
-    word-break: break-all;
-    user-select: text;
-    white-space: pre-wrap;
-  }
-
   /* ---------- Dashboard ---------- */
   .dashboard {
     display: grid;
@@ -1299,7 +1284,6 @@ try {
     <div class="app-header-actions">
       <span class="current-user" id="current-user"></span>
       <span class="sync-status hidden" id="sync-status"></span>
-      <button class="btn" id="btn-sync-now" title="手动同步到云端">☁️ 同步</button>
       <div class="theme-picker">
         <button class="btn theme-toggle" id="btn-theme-toggle" title="切换风格">🎨 <span>风格</span></button>
       </div>
@@ -1312,8 +1296,6 @@ try {
   </header>
 
   <input type="file" id="data-file-input" accept=".json,application/json" style="display:none">
-
-  <div class="sync-detail hidden" id="sync-detail"></div>
 
   <section class="dashboard">
     <div class="card balance-card">
@@ -3135,57 +3117,6 @@ try {
     location.reload();
   }
 
-  function showSyncDetail(text) {
-    const el = document.getElementById('sync-detail');
-    if (!el) return;
-    el.textContent = text;
-    el.classList.remove('hidden');
-  }
-  async function manualSync() {
-    const account = getCurrentAccount();
-    if (!account) return;
-    if (!sbConfigured()) { showToast('云同步未配置', 'warn'); return; }
-    showSyncState('☁️ 同步中…', 'syncing');
-    try {
-      const localCounts = {
-        overtime: readAccountData(account, 'overtime').length,
-        compensatory: readAccountData(account, 'compensatory').length,
-        leaveQuota: readAccountData(account, 'leaveQuota').length
-      };
-      const localHasData = localCounts.overtime > 0 || localCounts.compensatory > 0 || localCounts.leaveQuota > 0;
-      const cloud = await sbFetchData(account);
-      const cloudCounts = cloud ? {
-        overtime: (cloud.overtime || []).length,
-        compensatory: (cloud.compensatory || []).length,
-        leaveQuota: (cloud.leaveQuota || []).length
-      } : null;
-      const cloudHasData = cloudCounts && (cloudCounts.overtime > 0 || cloudCounts.compensatory > 0 || cloudCounts.leaveQuota > 0);
-
-      if (localHasData) {
-        await sbPushData(account);
-        const verify = await sbFetchData(account);
-        const vc = verify ? { overtime: (verify.overtime || []).length, compensatory: (verify.compensatory || []).length, leaveQuota: (verify.leaveQuota || []).length } : null;
-        showSyncState('☁️ 已同步', 'ok');
-        showToast('已上传到云端 ✓', 'success');
-        showSyncDetail('【同步诊断】请把这段文字发给开发者\n' +
-          '本地数据：加班 ' + localCounts.overtime + ' 笔，年假 ' + localCounts.leaveQuota + ' 笔，调休 ' + localCounts.compensatory + ' 笔\n' +
-          '云端数据（上传后）：加班 ' + (vc ? vc.overtime : '?') + ' 笔，年假 ' + (vc ? vc.leaveQuota : '?') + ' 笔，调休 ' + (vc ? vc.compensatory : '?') + ' 笔');
-      } else if (cloudHasData) {
-        applyCloudData(account, cloud);
-        migrateData();
-        renderAll();
-        showSyncState('☁️ 已同步', 'ok');
-        showToast('已从云端同步✓ [加班' + cloudCounts.overtime + ' 年假' + cloudCounts.leaveQuota + ' 调休' + cloudCounts.compensatory + ']', 'success');
-      } else {
-        showSyncState('☁️ 已同步', 'ok');
-        showToast('本地和云端都无数据 [本地加班' + localCounts.overtime + '笔]', 'warn');
-      }
-    } catch (e) {
-      showSyncState('☁️ 同步失败', 'err');
-      showToast('同步失败：' + (e && e.message ? e.message : e), 'error');
-    }
-  }
-
   // ---------- 加班打卡 ----------
   let toastTimer = null;
   function showToast(msg, type) {
@@ -3249,7 +3180,6 @@ try {
     document.getElementById('data-file-input').addEventListener('change', importDataJson);
     document.getElementById('btn-logout').addEventListener('click', logout);
     document.getElementById('btn-punch').addEventListener('click', punchClock);
-    document.getElementById('btn-sync-now').addEventListener('click', manualSync);
     bindLeaveStatsEvents();
 
     document.getElementById('overtime-cancel').addEventListener('click', closeOvertimeModal);
